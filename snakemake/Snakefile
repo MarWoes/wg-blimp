@@ -1,6 +1,10 @@
-import os
 
-configfile: 'config.yaml'
+# abort if no config is set
+if len(config) == 0:
+
+    raise ValueError('config not set, make sure to run snakemake with config file')
+
+snakemake_dir = sys.path[0]
 
 output_dir = config['output_dir']
 alignment_dir = output_dir + '/alignment'
@@ -260,10 +264,10 @@ rule dmr_coverage:
 
 rule dmr_annotation:
     input:
-        cgi_annotation_file = config['cgi_annotation_file'],
-        gene_annotation_file = config['gene_annotation_file'],
-        repeat_masker_annotation_file = config['repeat_masker_annotation_file'],
-        transcript_start_site_file = config['transcript_start_site_file'],
+        cgi_annotation_file = snakemake_dir + '/' + config['cgi_annotation_file'],
+        gene_annotation_file = snakemake_dir + '/' + config['gene_annotation_file'],
+        repeat_masker_annotation_file = snakemake_dir + '/' + config['repeat_masker_annotation_file'],
+        transcript_start_site_file = snakemake_dir + '/' + config['transcript_start_site_file'],
         coverages = expand(dmr_dir + '/dmr-coverage/{sample}.regions.bed.gz', sample = config['samples']),
         combined_dmrs = dmr_dir + '/combined-dmrs.csv'
     output:

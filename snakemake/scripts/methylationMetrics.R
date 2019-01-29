@@ -49,5 +49,5 @@ if (exists("snakemake")) {
     snakemake@output$methylation_metrics
   )
 
-  save.image("scripts/conversion-snakemake.Rdata")
+  # save.image("scripts/conversion-snakemake.Rdata")
 }

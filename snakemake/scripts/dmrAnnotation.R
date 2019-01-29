@@ -88,7 +88,7 @@ wgbs.annotateDMRs <- function (dmrFile, gzippedCgiFile, gzippedGeneFile, gzipped
 }
 
 if (exists("snakemake")) {
-   save.image(file = "scripts/dmr-annotation-snakemake.Rdata")
+   # save.image(file = "scripts/dmr-annotation-snakemake.Rdata")
    wgbs.annotateDMRs(
      snakemake@input$combined_dmrs,
      snakemake@input$cgi_annotation_file,

@@ -109,7 +109,7 @@ wgbs.combineDmrs <- function (bsseqFile, camelFile, metileneFile, csvOutput, bed
 }
 
 if (exists("snakemake")) {
-  save.image(file = "scripts/dmr-combination-snakemake.Rdata")
+  # save.image(file = "scripts/dmr-combination-snakemake.Rdata")
   wgbs.combineDmrs(
     snakemake@input$bsseq,
     snakemake@input$camel,

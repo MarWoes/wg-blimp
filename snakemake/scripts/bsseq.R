@@ -50,5 +50,5 @@ if (exists("snakemake")) {
            snakemake@output$rdata,
            snakemake@output$csv,
            snakemake@output$pdf)
-  save.image(file = "snakemake.Rdata")
+  # save.image(file = "snakemake.Rdata")
 }

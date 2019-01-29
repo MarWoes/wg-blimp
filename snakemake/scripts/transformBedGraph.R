@@ -27,5 +27,5 @@ if (exists("snakemake")) {
     snakemake@output$bedGraph
   )
 
-  save.image("scripts/bedgraph-snakemake.RData")
+  # save.image("scripts/bedgraph-snakemake.RData")
 }

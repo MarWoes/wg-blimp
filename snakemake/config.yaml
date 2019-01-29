@@ -25,7 +25,7 @@ dmr_tools: [
   'metilene'
 ]
 rawdir:
-  '../test/fastq'
+  '../wg-blimp/test/fastq'
 rawsuffixregex:
   first:  '_1\.fastq'
   second: '_2\.fastq'
