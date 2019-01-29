@@ -1,7 +1,7 @@
 output_dir:
   '/media/holmes/scripts/wg-blimp-output'
 target_files: [
-  'annotated-dmrs.csv',
+  'dmr/annotated-dmrs.csv',
   'qc/multiqc_report.html',
   'qc/methylation_metrics.csv'
 ]
@@ -21,11 +21,11 @@ group2: [
 ]
 dmr_tools: [
   'bsseq',
-  'camel',
+  #'camel',
   'metilene'
 ]
 rawdir:
-  'simulation'
+  '../test/fastq'
 rawsuffixregex:
   first:  '_1\.fastq'
   second: '_2\.fastq'

@@ -68,7 +68,7 @@ rule sort_bam:
     threads:
         num_threads
     shell:
-        'samtools sort -o {output} -@ {threads} {input.bam}'
+        'samtools sort -o {output} -@ {threads} {input}'
 
 
 rule mark_duplicates:
@@ -80,7 +80,7 @@ rule mark_duplicates:
     log:
         log_dir + '/{sample}.mark-duplicates.log'
     shell:
-        'picard MarkDuplicates I={input.bam} O={output.bam} M={output.metrics} &> {log}'
+        'picard MarkDuplicates I={input} O={output.bam} M={output.metrics} &> {log}'
 
 
 rule index_bam:
@@ -102,7 +102,7 @@ rule fastqc:
     log:
         log_dir + '/{sample}.fastqc.log'
     shell:
-        'fastqc -o qc/fastqc {input.bam} &> {log}'
+        'fastqc -o $(dirname {output}) {input.bam} &> {log}'
 
 rule picard_metrics:
     input:
@@ -139,7 +139,7 @@ rule multiqc:
     output:
         qc_dir + '/multiqc_report.html'
     shell:
-        'multiqc -f -o qc qc/fastqc qc/picard-metrics qc/qualimap'
+        'multiqc -f -o {qc_dir} {qc_dir}/fastqc {qc_dir}/picard-metrics {qc_dir}/qualimap'
 
 rule methylation_metrics:
     input:
@@ -159,9 +159,10 @@ rule methyl_dackel:
     output:
         methylation_dir + '/{sample}_CpG.bedGraph'
     params:
-        min_cov  = config['min_cov']
+        min_cov  = config['min_cov'],
+        methylation_dir = methylation_dir
     shell:
-        'MethylDackel extract --mergeContext -o methylation/$(basename {input.bam} .bam) {input.ref} {input.bam}'
+        'MethylDackel extract --mergeContext -o {params.methylation_dir}/{wildcards.sample} {input.ref} {input.bam}'
 
 rule bedgraph_to_methylation_ratio:
     input:
@@ -203,7 +204,7 @@ rule camel_call:
     output:
         camel_dir + '/{sample}.h5'
     shell:
-        'python submodules/camel/camel/modules/call.py {input.bam} {input.index} {output}'
+        'python submodules/camel/modules/call.py {input.bam} {input.index} {output}'
 
 rule camel_dmr:
     input:
@@ -217,7 +218,7 @@ rule camel_dmr:
         min_diff = config['min_diff'],
         min_cov  = config['min_cov']
     shell:
-        'python submodules/camel/camel/modules/dmr.py {input.index} --case {input.case} --control {input.control} --min_diff {params.min_diff} --min_cpg {params.min_cpg} --min_cov {params.min_cov} > {output}'
+        'python submodules/camel/modules/dmr.py {input.index} --case {input.case} --control {input.control} --min_diff {params.min_diff} --min_cpg {params.min_cpg} --min_cov {params.min_cov} > {output}'
 
 rule bsseq:
     input:
@@ -233,7 +234,7 @@ rule bsseq:
 ### DMR comparison
 
 def expected_tool_files():
-    return {tool: tool + '/dmrs.csv' for tool in config['dmr_tools']}
+    return {tool: dmr_dir + '/' + tool + '/dmrs.csv' for tool in config['dmr_tools']}
 
 rule dmr_combination:
     input:
@@ -247,15 +248,15 @@ rule dmr_combination:
 rule dmr_coverage:
     input:
         bed = dmr_dir + '/dmr-coverage/combined-dmrs.bed',
-        bam = 'alignment_dir' + '/{sample}.bam',
-        bai = 'alignment_dir' + '/{sample}.bai'
+        bam = alignment_dir + '/{sample}.bam',
+        bai = alignment_dir + '/{sample}.bai'
     output:
         dmr_dir + '/dmr-coverage/{sample}.regions.bed.gz'
     params:
         min_mapq = config['annotation_min_mapq']
     threads: config['computing_threads']
     shell:
-        'mosdepth --threads {threads} --no-per-base --mapq {params.min_mapq} --by {input.bed} dmr-coverage/{wildcards.sample} {input.bam}'
+        'mosdepth --threads {threads} --no-per-base --mapq {params.min_mapq} --by {input.bed} $(dirname {output})/{wildcards.sample} {input.bam}'
 
 rule dmr_annotation:
     input:

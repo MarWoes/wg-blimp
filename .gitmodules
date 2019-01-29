@@ -1,0 +1,3 @@
+[submodule "snakemake/submodules"]
+	path = snakemake/submodules
+	url = https://bitbucket.org/christopherschroeder/camel.git
