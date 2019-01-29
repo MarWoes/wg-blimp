@@ -1,0 +1,274 @@
+import os
+
+configfile: 'config.yaml'
+
+output_dir = config['output_dir']
+alignment_dir = output_dir + '/alignment'
+log_dir = output_dir + '/logs'
+methylation_dir = output_dir + '/methylation'
+qc_dir = output_dir + '/qc'
+dmr_dir = output_dir + '/dmr'
+metilene_dir = dmr_dir + '/metilene'
+bsseq_dir = dmr_dir + '/bsseq'
+camel_dir = dmr_dir + '/camel'
+
+
+num_threads = config['computing_threads']
+io_threads = config['io_threads']
+
+ref_fasta = config['ref']
+
+rule all:
+    input:
+        [ output_dir + '/' + outfile for outfile in config['target_files']]
+
+### ALIGNMENT
+
+rule find_fqs:
+    output:
+        first  = output_dir +'/raw/{sample}.first.txt',
+        second = output_dir +'/raw/{sample}.second.txt'
+    params:
+        rawdir = config['rawdir'],
+        first_regex = config['rawsuffixregex']['first'],
+        second_regex = config['rawsuffixregex']['second']
+    shell:
+        """
+        find {params.rawdir} -type f | grep -E .*{wildcards.sample}.*{params.first_regex}  | sort > {output.first}
+        find {params.rawdir} -type f | grep -E .*{wildcards.sample}.*{params.second_regex} | sort > {output.second}
+        """
+
+
+rule bwameth_align:
+    input:
+        ref = ref_fasta,
+        first  = output_dir +'/raw/{sample}.first.txt',
+        second = output_dir +'/raw/{sample}.second.txt'
+    output:
+        temp(alignment_dir + '/{sample}.unsorted.bam')
+    log:
+        log_dir + '/{sample}.align.log'
+    threads:
+        num_threads
+    shell:
+        """
+        FQ1=$(cat {input.first} | tr '\n' ',')
+        FQ2=$(cat {input.second} | tr '\n' ',')
+        bwameth.py -t {threads} --reference {input.ref} $FQ1 $FQ2 2> {log} | samtools view -b - > {output}
+        """
+
+
+rule sort_bam:
+    input:
+        rules.bwameth_align.output
+    output:
+        temp(alignment_dir + '/{sample}.sorted.bam')
+    log:
+        log_dir + '/{sample}.sorting.log'
+    threads:
+        num_threads
+    shell:
+        'samtools sort -o {output} -@ {threads} {input.bam}'
+
+
+rule mark_duplicates:
+    input:
+        rules.sort_bam.output
+    output:
+        bam = alignment_dir + '/{sample}.bam',
+        metrics = temp(alignment_dir + '/{sample}-dup-metrics.txt')
+    log:
+        log_dir + '/{sample}.mark-duplicates.log'
+    shell:
+        'picard MarkDuplicates I={input.bam} O={output.bam} M={output.metrics} &> {log}'
+
+
+rule index_bam:
+    input:
+        bam = alignment_dir + '/{sample}.bam'
+    output:
+        alignment_dir + '/{sample}.bai'
+    shell:
+        'samtools index {input} {output}'
+
+
+### QC
+
+rule fastqc:
+    input:
+        bam = alignment_dir + '/{sample}.bam'
+    output:
+        qc_dir + '/fastqc/{sample}_fastqc.html'
+    log:
+        log_dir + '/{sample}.fastqc.log'
+    shell:
+        'fastqc -o qc/fastqc {input.bam} &> {log}'
+
+rule picard_metrics:
+    input:
+        ref = ref_fasta,
+        bam = alignment_dir + '/{sample}.bam'
+    output:
+        alignment = qc_dir +'/picard-metrics/{sample}-alignment.txt',
+        insert    = qc_dir +'/picard-metrics/{sample}-insert-size.txt',
+        hist      = temp(qc_dir +'/picard-metrics/{sample}-hist.pdf')
+    log:
+        log_dir + '/{sample}.picard-metrics.log'
+    shell:
+        """
+        picard CollectAlignmentSummaryMetrics R={input.ref} I={input.bam} O={output.alignment} &> {log}
+        picard CollectInsertSizeMetrics I={input.bam} O={output.insert} H={output.hist} &> {log}
+        """
+
+rule qualimap:
+    input:
+        alignment_dir + '/{sample}.bam'
+    output:
+        qc_dir + '/qualimap/{sample}/qualimapReport.html'
+    threads:
+        io_threads
+    shell:
+        'qualimap bamqc -bam {input} -outdir $(dirname {output}) -nt {threads} --java-mem-size=16G'
+
+rule multiqc:
+    input:
+        fastqc           = expand(qc_dir + '/fastqc/{sample}_fastqc.html', sample = config['samples']),
+        alnMetrics       = expand(qc_dir + '/picard-metrics/{sample}-alignment.txt', sample = config['samples']),
+        insertMetrics    = expand(qc_dir + '/picard-metrics/{sample}-insert-size.txt', sample = config['samples']),
+        qualimap         = expand(qc_dir + '/qualimap/{sample}/qualimapReport.html', sample = config['samples'])
+    output:
+        qc_dir + '/multiqc_report.html'
+    shell:
+        'multiqc -f -o qc qc/fastqc qc/picard-metrics qc/qualimap'
+
+rule methylation_metrics:
+    input:
+        bed_graphs = expand(methylation_dir + '/{sample}_CpG.bedGraph', sample = config['samples'])
+    output:
+        methylation_metrics = qc_dir + '/methylation_metrics.csv'
+    script:
+        'scripts/methylationMetrics.R'
+
+### DMR CALLING
+
+rule methyl_dackel:
+    input:
+        ref = ref_fasta,
+        bai = alignment_dir + '/{sample}.bai',
+        bam = alignment_dir + '/{sample}.bam'
+    output:
+        methylation_dir + '/{sample}_CpG.bedGraph'
+    params:
+        min_cov  = config['min_cov']
+    shell:
+        'MethylDackel extract --mergeContext -o methylation/$(basename {input.bam} .bam) {input.ref} {input.bam}'
+
+rule bedgraph_to_methylation_ratio:
+    input:
+        bedGraph = methylation_dir + '/{sample}_CpG.bedGraph'
+    output:
+        bedGraph = temp(methylation_dir + '/{sample}_CpG_ratio.bedGraph')
+    script:
+        'scripts/transformBedGraph.R'
+
+rule metilene_input:
+    input:
+        expand(methylation_dir + '/{sample}_CpG_ratio.bedGraph', sample = config['group1']),
+        expand(methylation_dir + '/{sample}_CpG_ratio.bedGraph', sample = config['group2'])
+    output:
+        metilene_dir + '/metilene-input.bedGraph'
+    params:
+        g1_header = ' '.join([ 'g1_' + s for s in config['group1']]),
+        g2_header = ' '.join([ 'g2_' + s for s in config['group2']])
+    shell:
+        'bedtools unionbedg -filler NA -header -names {params.g1_header} {params.g2_header} -i {input} > {output}'
+
+rule metilene:
+    input:
+        metilene_dir + '/metilene-input.bedGraph'
+    output:
+        metilene_dir + '/dmrs.csv'
+    params:
+        min_cpg = config['min_cpg'],
+        min_diff = config['min_diff']
+    threads: config['computing_threads']
+    shell:
+        'metilene -m {params.min_cpg} -d {params.min_diff} -t {threads} {input} > {output}'
+
+rule camel_call:
+    input:
+        index = config['h5index'],
+        bam = alignment_dir + '/{sample}.bam',
+        bai = alignment_dir + '/{sample}.bai'
+    output:
+        camel_dir + '/{sample}.h5'
+    shell:
+        'python submodules/camel/camel/modules/call.py {input.bam} {input.index} {output}'
+
+rule camel_dmr:
+    input:
+        index   = config['h5index'],
+        control = expand(camel_dir + '/{sample}.h5', sample = config['group1']),
+        case    = expand(camel_dir + '/{sample}.h5', sample = config['group2'])
+    output:
+        camel_dir + '/dmrs.csv'
+    params:
+        min_cpg  = config['min_cpg'],
+        min_diff = config['min_diff'],
+        min_cov  = config['min_cov']
+    shell:
+        'python submodules/camel/camel/modules/dmr.py {input.index} --case {input.case} --control {input.control} --min_diff {params.min_diff} --min_cpg {params.min_cpg} --min_cov {params.min_cov} > {output}'
+
+rule bsseq:
+    input:
+        meth = expand(methylation_dir + '/{sample}_CpG.bedGraph', sample = config['samples'])
+    output:
+        rdata = bsseq_dir + '/bsseq.Rdata',
+        csv   = bsseq_dir + '/dmrs.csv',
+        pdf   = bsseq_dir + '/top100.pdf'
+    threads: config['io_threads']
+    script:
+        'scripts/bsseq.R'
+
+### DMR comparison
+
+def expected_tool_files():
+    return {tool: tool + '/dmrs.csv' for tool in config['dmr_tools']}
+
+rule dmr_combination:
+    input:
+        **expected_tool_files()
+    output:
+        csv = dmr_dir + '/combined-dmrs.csv',
+        bed = dmr_dir + '/dmr-coverage/combined-dmrs.bed'
+    script:
+        'scripts/dmrCombination.R'
+
+rule dmr_coverage:
+    input:
+        bed = dmr_dir + '/dmr-coverage/combined-dmrs.bed',
+        bam = 'alignment_dir' + '/{sample}.bam',
+        bai = 'alignment_dir' + '/{sample}.bai'
+    output:
+        dmr_dir + '/dmr-coverage/{sample}.regions.bed.gz'
+    params:
+        min_mapq = config['annotation_min_mapq']
+    threads: config['computing_threads']
+    shell:
+        'mosdepth --threads {threads} --no-per-base --mapq {params.min_mapq} --by {input.bed} dmr-coverage/{wildcards.sample} {input.bam}'
+
+rule dmr_annotation:
+    input:
+        cgi_annotation_file = config['cgi_annotation_file'],
+        gene_annotation_file = config['gene_annotation_file'],
+        repeat_masker_annotation_file = config['repeat_masker_annotation_file'],
+        transcript_start_site_file = config['transcript_start_site_file'],
+        coverages = expand(dmr_dir + '/dmr-coverage/{sample}.regions.bed.gz', sample = config['samples']),
+        combined_dmrs = dmr_dir + '/combined-dmrs.csv'
+    output:
+        annotated_dmrs = dmr_dir + '/annotated-dmrs.csv'
+    params:
+        biotypes = config['annotation_allowed_biotypes'],
+        tss_distances = config['promoter_tss_distances']
+    script:
+        'scripts/dmrAnnotation.R'

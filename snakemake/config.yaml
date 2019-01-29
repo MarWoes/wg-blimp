@@ -1,0 +1,75 @@
+output_dir:
+  '/media/holmes/scripts/wg-blimp-output'
+target_files: [
+  'annotated-dmrs.csv',
+  'qc/multiqc_report.html',
+  'qc/methylation_metrics.csv'
+]
+samples: [
+  'simulated1',
+  'simulated2',
+  'simulated3',
+  'simulated4'
+]
+group1: [
+  'simulated1',
+  'simulated2'
+]
+group2: [
+  'simulated3',
+  'simulated4'
+]
+dmr_tools: [
+  'bsseq',
+  'camel',
+  'metilene'
+]
+rawdir:
+  'simulation'
+rawsuffixregex:
+  first:  '_1\.fastq'
+  second: '_2\.fastq'
+ref:
+  '/media/holmes/genomes/Homo_sapiens.GRCh38.p7/assembled.fa'
+h5index:
+  '/media/holmes/genomes/Homo_sapiens.GRCh38.p7/assembled.h5'
+cgi_annotation_file:
+  'annotation/cgi-locations-hg38.csv.gz'
+gene_annotation_file:
+  'annotation/gene-locations-hg38.csv.gz'
+repeat_masker_annotation_file:
+  'annotation/repeat-masker-hg38.csv.gz'
+transcript_start_site_file:
+  'annotation/transcription-start-sites-hg38.csv.gz'
+promoter_tss_distances: [
+  -1000,
+  1000
+]
+annotation_allowed_biotypes: [
+  # protein coding genes
+  'protein_coding',
+  # lncRNA
+  'non_coding',
+  '3prime_overlapping_ncRNA',
+  'antisense',
+  'lincRNA',
+  'retained_intron',
+  'sense_intronic',
+  'sense_overlapping',
+  'macro_lncRNA',
+  'bidirectional_promoter_lncRNA',
+  # miRNA
+  'miRNA'
+]
+annotation_min_mapq:
+  10
+computing_threads:
+  32
+io_threads:
+  4
+min_cpg:
+  5
+min_diff:
+  0.3
+min_cov:
+  5

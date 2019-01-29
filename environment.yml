@@ -1,0 +1,23 @@
+name: wgbs-imi
+channels:
+  - conda-forge
+  - bioconda
+dependencies:
+  - bwameth=0.2.0
+  - mosdepth
+  - picard
+  - samtools
+  - bwa
+  - snakemake
+  - fastqc
+  - multiqc
+  - methyldackel
+  - qualimap
+  - metilene
+  - bedtools
+  - bioconductor-bsseq
+  - pysam
+  - h5py
+  - r-data.table
+  - r-upsetr
+  - r-stringr
