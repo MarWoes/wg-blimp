@@ -1,3 +1,10 @@
+if (exists("snakemake")) {
+  logFile <- file(snakemake@log[[1]])
+
+  sink(logFile, append = TRUE)
+  sink(logFile, append = TRUE, type = "message")
+}
+
 library(data.table)
 library(GenomicRanges)
 
@@ -88,6 +95,7 @@ wgbs.annotateDMRs <- function (dmrFile, gzippedCgiFile, gzippedGeneFile, gzipped
 }
 
 if (exists("snakemake")) {
+
    # save.image(file = "scripts/dmr-annotation-snakemake.Rdata")
    wgbs.annotateDMRs(
      snakemake@input$combined_dmrs,
@@ -100,4 +108,5 @@ if (exists("snakemake")) {
      snakemake@params$tss_distances,
      snakemake@output$annotated_dmrs
    )
+
 }

@@ -1,3 +1,10 @@
+if (exists("snakemake")) {
+  logFile <- file(snakemake@log[[1]])
+
+  sink(logFile, append = TRUE)
+  sink(logFile, append = TRUE, type = "message")
+}
+
 library(GenomicRanges)
 library(data.table)
 library(stringr)
@@ -109,6 +116,7 @@ wgbs.combineDmrs <- function (bsseqFile, camelFile, metileneFile, csvOutput, bed
 }
 
 if (exists("snakemake")) {
+
   # save.image(file = "scripts/dmr-combination-snakemake.Rdata")
   wgbs.combineDmrs(
     snakemake@input$bsseq,
@@ -119,4 +127,5 @@ if (exists("snakemake")) {
     snakemake@config$min_cpg,
     snakemake@config$min_diff
   )
+
 }

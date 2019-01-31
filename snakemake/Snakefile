@@ -55,10 +55,12 @@ rule bwameth_indexing:
             ref_fasta + '.bwameth.c2t.sa',
             ref_fasta + '.fai'
         ]
+    log:
+        log_dir + '/bwameth_indexing.log'
     shell:
         """
-        bwameth.py index {input}
-        samtools faidx {input}
+        bwameth.py index {input} 2> {log}
+        samtools faidx {input} 2> {log}
         """
 
 rule bwameth_align:
@@ -109,7 +111,7 @@ rule mark_duplicates:
         bam = alignment_dir + '/{sample}.bam',
         metrics = temp(alignment_dir + '/{sample}-dup-metrics.txt')
     log:
-        log_dir + '/{sample}.mark-duplicates.log'
+        log_dir + '/{sample}.mark_duplicates.log'
     shell:
         'picard MarkDuplicates I={input} O={output.bam} M={output.metrics} &> {log}'
 
@@ -144,7 +146,7 @@ rule picard_metrics:
         insert    = qc_dir +'/picard-metrics/{sample}-insert-size.txt',
         hist      = temp(qc_dir +'/picard-metrics/{sample}-hist.pdf')
     log:
-        log_dir + '/{sample}.picard-metrics.log'
+        log_dir + '/{sample}.picard_metrics.log'
     shell:
         """
         picard CollectAlignmentSummaryMetrics R={input.ref} I={input.bam} O={output.alignment} &> {log}
@@ -158,8 +160,10 @@ rule qualimap:
         qc_dir + '/qualimap/{sample}/qualimapReport.html'
     threads:
         io_threads
+    log:
+        log_dir + '/{sample}.qualimap.log'
     shell:
-        'qualimap bamqc -bam {input} -outdir $(dirname {output}) -nt {threads} --java-mem-size=16G'
+        'qualimap bamqc -bam {input} -outdir $(dirname {output}) -nt {threads} --java-mem-size=16G &> {log} '
 
 rule multiqc:
     input:
@@ -169,14 +173,18 @@ rule multiqc:
         qualimap         = expand(qc_dir + '/qualimap/{sample}/qualimapReport.html', sample = config['samples'])
     output:
         qc_dir + '/multiqc_report.html'
+    log:
+        log_dir + '/multiqc.log'
     shell:
-        'multiqc -f -o {qc_dir} {qc_dir}/fastqc {qc_dir}/picard-metrics {qc_dir}/qualimap'
+        'multiqc -f -o {qc_dir} {qc_dir}/fastqc {qc_dir}/picard-metrics {qc_dir}/qualimap &> {log} '
 
 rule methylation_metrics:
     input:
         bed_graphs = expand(methylation_dir + '/{sample}_CpG.bedGraph', sample = config['samples'])
     output:
         methylation_metrics = qc_dir + '/methylation_metrics.csv'
+    log:
+        log_dir + '/methylation_metrics.log'
     script:
         'scripts/methylationMetrics.R'
 
@@ -200,6 +208,8 @@ rule bedgraph_to_methylation_ratio:
         bedGraph = methylation_dir + '/{sample}_CpG.bedGraph'
     output:
         bedGraph = temp(methylation_dir + '/{sample}_CpG_ratio.bedGraph')
+    log:
+        log_dir + '/{sample}.bedgraph_to_methylation_ratio.log'
     script:
         'scripts/transformBedGraph.R'
 
@@ -223,9 +233,12 @@ rule metilene:
     params:
         min_cpg = config['min_cpg'],
         min_diff = config['min_diff']
-    threads: config['computing_threads']
+    threads:
+        config['computing_threads']
+    log:
+        log_dir + '/metilene.log'
     shell:
-        'metilene -m {params.min_cpg} -d {params.min_diff} -t {threads} {input} > {output}'
+        'metilene -m {params.min_cpg} -d {params.min_diff} -t {threads} {input} > {output} 2> {log}'
 
 rule camel_index:
     input:
@@ -271,7 +284,10 @@ rule bsseq:
         rdata = bsseq_dir + '/bsseq.Rdata',
         csv   = bsseq_dir + '/dmrs.csv',
         pdf   = bsseq_dir + '/top100.pdf'
-    threads: config['io_threads']
+    threads:
+        config['io_threads']
+    log:
+        log_dir + '/bsseq.log'
     script:
         'scripts/bsseq.R'
 
@@ -286,6 +302,8 @@ rule dmr_combination:
     output:
         csv = dmr_dir + '/combined-dmrs.csv',
         bed = dmr_dir + '/dmr-coverage/combined-dmrs.bed'
+    log:
+        log_dir + '/dmr_combination.log'
     script:
         'scripts/dmrCombination.R'
 
@@ -307,8 +325,10 @@ rule repeat_masker_download:
         gzipped_csv = snakemake_dir + '/' + config['repeat_masker_annotation_file']
     params:
         link = config['repeat_masker_links'][config['repeat_masker_annotation_file']]
+    log:
+        log_dir + '/repeat_masker_download.log'
     shell:
-        'wget -O {output} {params.link}'
+        'wget -O {output} {params.link} 2> {log}'
 
 rule dmr_annotation:
     input:
@@ -323,5 +343,7 @@ rule dmr_annotation:
     params:
         biotypes = config['annotation_allowed_biotypes'],
         tss_distances = config['promoter_tss_distances']
+    log:
+        log_dir + '/dmr_annotation.log'
     script:
         'scripts/dmrAnnotation.R'

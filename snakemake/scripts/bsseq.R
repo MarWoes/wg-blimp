@@ -1,3 +1,10 @@
+if (exists("snakemake")) {
+  logFile <- file(snakemake@log[[1]])
+
+  sink(logFile, append = TRUE)
+  sink(logFile, append = TRUE, type = "message")
+}
+
 library(bsseq)
 
 callDmrs <- function (methylDackelBedGraphFiles, sampleNames, group1Samples, group2Samples, threads, min_cpg, min_diff, rdatFile, csvFile, pdfFile) {
@@ -40,6 +47,7 @@ callDmrs <- function (methylDackelBedGraphFiles, sampleNames, group1Samples, gro
 }
 
 if (exists("snakemake")) {
+
   callDmrs(snakemake@input$meth,
            snakemake@config$samples,
            snakemake@config$group1,
@@ -51,4 +59,5 @@ if (exists("snakemake")) {
            snakemake@output$csv,
            snakemake@output$pdf)
   # save.image(file = "snakemake.Rdata")
+
 }
