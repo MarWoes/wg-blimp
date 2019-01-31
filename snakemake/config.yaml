@@ -21,7 +21,7 @@ group2: [
 ]
 dmr_tools: [
   'bsseq',
-  #'camel',
+  # 'camel',
   'metilene'
 ]
 rawdir:
@@ -31,8 +31,6 @@ rawsuffixregex:
   second: '_2\.fastq'
 ref:
   '/media/holmes/scripts/wg-blimp/test/lambda-phage.fa'
-h5index:
-  '/media/holmes/genomes/Homo_sapiens.GRCh38.p7/assembled.h5'
 cgi_annotation_file:
   'annotation/cgi-locations-hg38.csv.gz'
 gene_annotation_file:

@@ -227,19 +227,31 @@ rule metilene:
     shell:
         'metilene -m {params.min_cpg} -d {params.min_diff} -t {threads} {input} > {output}'
 
+rule camel_index:
+    input:
+        ref = ref_fasta,
+    output:
+        camel_h5 = ref_fasta + '.h5'
+    params:
+        snakemake_dir = snakemake_dir
+    shell:
+        'python {params.snakemake_dir}/submodules/camel/modules/index.py {input.ref} {output}'
+
 rule camel_call:
     input:
-        index = config['h5index'],
+        index = ref_fasta + '.h5',
         bam = alignment_dir + '/{sample}.bam',
         bai = alignment_dir + '/{sample}.bai'
     output:
         camel_dir + '/{sample}.h5'
+    params:
+        snakemake_dir = snakemake_dir
     shell:
-        'python submodules/camel/modules/call.py {input.bam} {input.index} {output}'
+        'python {params.snakemake_dir}/submodules/camel/modules/call.py {input.bam} {input.index} {output}'
 
 rule camel_dmr:
     input:
-        index   = config['h5index'],
+        index   = ref_fasta + '.h5',
         control = expand(camel_dir + '/{sample}.h5', sample = config['group1']),
         case    = expand(camel_dir + '/{sample}.h5', sample = config['group2'])
     output:
@@ -247,9 +259,10 @@ rule camel_dmr:
     params:
         min_cpg  = config['min_cpg'],
         min_diff = config['min_diff'],
-        min_cov  = config['min_cov']
+        min_cov  = config['min_cov'],
+        snakemake_dir = snakemake_dir
     shell:
-        'python submodules/camel/modules/dmr.py {input.index} --case {input.case} --control {input.control} --min_diff {params.min_diff} --min_cpg {params.min_cpg} --min_cov {params.min_cov} > {output}'
+        'python {params.snakemake_dir}/submodules/camel/modules/dmr.py {input.index} --case {input.case} --control {input.control} --min_diff {params.min_diff} --min_cpg {params.min_cpg} --min_cov {params.min_cov} > {output}'
 
 rule bsseq:
     input:
