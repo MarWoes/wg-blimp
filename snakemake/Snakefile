@@ -262,6 +262,14 @@ rule dmr_coverage:
     shell:
         'mosdepth --threads {threads} --no-per-base --mapq {params.min_mapq} --by {input.bed} $(dirname {output})/{wildcards.sample} {input.bam}'
 
+rule repeat_masker_download:
+    output:
+        gzipped_csv = snakemake_dir + '/' + config['repeat_masker_annotation_file']
+    params:
+        link = config['repeat_masker_links'][config['repeat_masker_annotation_file']]
+    shell:
+        'wget -O {output} {params.link}'
+
 rule dmr_annotation:
     input:
         cgi_annotation_file = snakemake_dir + '/' + config['cgi_annotation_file'],
