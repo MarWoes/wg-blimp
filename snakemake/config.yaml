@@ -30,7 +30,7 @@ rawsuffixregex:
   first:  '_1\.fastq'
   second: '_2\.fastq'
 ref:
-  '/media/holmes/genomes/Homo_sapiens.GRCh38.p7/assembled.fa'
+  '/media/holmes/scripts/wg-blimp/test/lambda-phage.fa'
 h5index:
   '/media/holmes/genomes/Homo_sapiens.GRCh38.p7/assembled.h5'
 cgi_annotation_file:
