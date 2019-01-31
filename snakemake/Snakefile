@@ -101,7 +101,7 @@ rule sort_bam:
     threads:
         num_threads
     shell:
-        'samtools sort -o {output} -@ {threads} {input}'
+        'samtools sort -o {output} -@ {threads} {input} 2> {log}'
 
 
 rule mark_duplicates:
@@ -259,8 +259,10 @@ rule camel_call:
         camel_dir + '/{sample}.h5'
     params:
         snakemake_dir = snakemake_dir
+    log:
+        log_dir + '/{sample}.camel_call.log'
     shell:
-        'python {params.snakemake_dir}/submodules/camel/modules/call.py {input.bam} {input.index} {output}'
+        'python {params.snakemake_dir}/submodules/camel/modules/call.py {input.bam} {input.index} {output} 2> {log}'
 
 rule camel_dmr:
     input:
@@ -274,8 +276,10 @@ rule camel_dmr:
         min_diff = config['min_diff'],
         min_cov  = config['min_cov'],
         snakemake_dir = snakemake_dir
+    log:
+        log_dir + '/camel.log'
     shell:
-        'python {params.snakemake_dir}/submodules/camel/modules/dmr.py {input.index} --case {input.case} --control {input.control} --min_diff {params.min_diff} --min_cpg {params.min_cpg} --min_cov {params.min_cov} > {output}'
+        'python {params.snakemake_dir}/submodules/camel/modules/dmr.py {input.index} --case {input.case} --control {input.control} --min_diff {params.min_diff} --min_cpg {params.min_cpg} --min_cov {params.min_cov} > {output} 2> {log}'
 
 rule bsseq:
     input:
