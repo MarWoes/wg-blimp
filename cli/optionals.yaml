@@ -1,34 +1,3 @@
-### REQUIRED ARGUMENTS BY USER
-rawdir:
-  '/scripts/test/fastq'
-output_dir:
-  '/output'
-group1: [
-  'simulated1',
-  'simulated2'
-]
-group2: [
-  'simulated3',
-  'simulated4'
-]
-samples: [
-  'simulated1',
-  'simulated2',
-  'simulated3',
-  'simulated4'
-]
-ref:
-  '/scripts/test/lambda-phage.fa'
-
-cgi_annotation_file:
-  'annotation/cgi-locations-hg38.csv.gz'
-gene_annotation_file:
-  'annotation/gene-locations-hg38.csv.gz'
-repeat_masker_annotation_file:
-  'annotation/repeat-masker-hg38.csv.gz'
-transcript_start_site_file:
-  'annotation/transcription-start-sites-hg38.csv.gz'
-
 annotation_min_mapq:
   10
 computing_threads:
@@ -54,7 +23,6 @@ dmr_tools: [
   #'camel',
   'metilene'
 ]
-
 promoter_tss_distances: [
   -1000,
   1000
