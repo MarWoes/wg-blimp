@@ -1,3 +1,5 @@
 snakemake/.snakemake
 *.Rdata
 *.RData
+cli/__pycache__/
+wg_blimp.egg-info/
