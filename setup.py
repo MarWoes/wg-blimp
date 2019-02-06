@@ -15,7 +15,7 @@ setuptools.setup(
     ],
     install_requires=[
         'click',
-        'pyyaml'
+        'ruamel.yaml'
     ],
     classifiers=[
         "Programming Language :: Python :: 3",

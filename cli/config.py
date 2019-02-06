@@ -1,4 +1,4 @@
-import yaml
+from ruamel.yaml import YAML
 
 CGI_LOCATION_FILE    = 'annotation/cgi-locations-{}.csv.gz'
 GENE_ANNOTATION_FILE = 'annotation/gene-locations-{}.csv.gz'
@@ -6,6 +6,9 @@ REPEAT_MASKER_FILE   = 'annotation/repeat-masker-{}.csv.gz'
 TSS_FILE             = 'annotation/transcription-start-sites-{}.csv.gz'
 
 DEFAULT_OPTIONALS_FILE = 'cli/optionals.yaml'
+
+yaml = YAML()
+yaml.default_flow_style = False
 
 def get_reference_annotation_files(reference_genome):
 
@@ -56,4 +59,4 @@ def dump_config(config_dict, target_file):
 
     with (open(target_file, 'w')) as f:
 
-        yaml.dump(config_dict, f, default_flow_style=False)
+        yaml.dump(config_dict, f)
