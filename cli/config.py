@@ -10,20 +10,20 @@ DEFAULT_OPTIONALS_FILE = 'cli/optionals.yaml'
 yaml = YAML()
 yaml.default_flow_style = False
 
-def get_reference_annotation_files(reference_genome):
+def get_reference_annotation_files(genome_build):
 
     return {
         'cgi_annotation_file':
-          CGI_LOCATION_FILE.format(reference_genome),
+          CGI_LOCATION_FILE.format(genome_build),
 
         'gene_annotation_file':
-          GENE_ANNOTATION_FILE.format(reference_genome),
+          GENE_ANNOTATION_FILE.format(genome_build),
 
         'repeat_masker_annotation_file':
-          REPEAT_MASKER_FILE.format(reference_genome),
+          REPEAT_MASKER_FILE.format(genome_build),
 
         'transcript_start_site_file':
-          TSS_FILE.format(reference_genome)
+          TSS_FILE.format(genome_build)
     }
 
 def get_default_optional_parameters():
@@ -34,7 +34,7 @@ def get_default_optional_parameters():
 
         return default_optionals
 
-def get_default_config(fastq_dir, fasta_ref, output_dir, group1, group2, reference_genome):
+def get_default_config(fastq_dir, fasta_ref, group1, group2, genome_build, output_dir):
 
     mandatory_parameters = {
         'rawdir': fastq_dir,
@@ -47,7 +47,7 @@ def get_default_config(fastq_dir, fasta_ref, output_dir, group1, group2, referen
 
     optional_parameters = get_default_optional_parameters()
 
-    reference_annotation_files = get_reference_annotation_files(reference_genome)
+    reference_annotation_files = get_reference_annotation_files(genome_build)
 
     return {
         **mandatory_parameters,
