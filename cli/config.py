@@ -26,6 +26,7 @@ def get_reference_annotation_files(genome_build):
           TSS_FILE.format(genome_build)
     }
 
+
 def get_default_optional_parameters():
 
     with open(DEFAULT_OPTIONALS_FILE) as f:
@@ -33,6 +34,7 @@ def get_default_optional_parameters():
         default_optionals = yaml.load(f)
 
         return default_optionals
+
 
 def get_default_config(fastq_dir, fasta_ref, group1, group2, genome_build, output_dir):
 
@@ -55,8 +57,26 @@ def get_default_config(fastq_dir, fasta_ref, group1, group2, genome_build, outpu
         **reference_annotation_files
     }
 
+
 def dump_config(config_dict, target_file):
 
     with (open(target_file, 'w')) as f:
 
         yaml.dump(config_dict, f)
+
+
+def create_config(use_sample_files, genome_build, fastq_dir, reference_fasta, group1, group2, output_dir, target_yaml):
+
+    if (use_sample_files):
+
+        samples_in_group1 = read_samples_from_file(group1)
+        samples_in_group2 = read_samples_from_file(group2)
+
+    else:
+
+        samples_in_group1 = group1.split(',')
+        samples_in_group2 = group2.split(',')
+
+    config_yaml = get_default_config(fastq_dir, reference_fasta, samples_in_group1, samples_in_group2, genome_build, output_dir)
+
+    dump_config(config_yaml, target_yaml)
