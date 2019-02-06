@@ -2,12 +2,6 @@ import click
 import cli.config
 import cli.snakemake
 
-def read_samples_from_file(sample_file):
-
-    with open(sample_file) as f:
-
-        return f.readlines()
-
 
 @click.group()
 def main():

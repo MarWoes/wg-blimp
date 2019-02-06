@@ -65,6 +65,13 @@ def dump_config(config_dict, target_file):
         yaml.dump(config_dict, f)
 
 
+def read_samples_from_file(sample_file):
+
+    with open(sample_file) as f:
+
+        return f.read().splitlines()
+
+
 def create_config(use_sample_files, genome_build, fastq_dir, reference_fasta, group1, group2, output_dir, target_yaml):
 
     if (use_sample_files):
