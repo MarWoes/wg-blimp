@@ -7,7 +7,7 @@ TSS_FILE             = 'annotation/transcription-start-sites-{}.csv.gz'
 
 DEFAULT_OPTIONALS_FILE = 'cli/optionals.yaml'
 
-yaml = YAML()
+yaml = YAML(typ='safe')
 yaml.default_flow_style = False
 
 def get_reference_annotation_files(genome_build):
