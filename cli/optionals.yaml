@@ -1,9 +1,5 @@
 annotation_min_mapq:
   10
-computing_threads:
-  8
-io_threads:
-  8
 min_cpg:
   5
 min_diff:

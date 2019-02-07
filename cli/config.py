@@ -36,7 +36,7 @@ def get_default_optional_parameters():
         return default_optionals
 
 
-def get_default_config(fastq_dir, fasta_ref, group1, group2, genome_build, output_dir):
+def get_default_config(fastq_dir, fasta_ref, group1, group2, genome_build, cores_per_job, output_dir):
 
     mandatory_parameters = {
         'rawdir': fastq_dir,
@@ -44,7 +44,9 @@ def get_default_config(fastq_dir, fasta_ref, group1, group2, genome_build, outpu
         'group1': group1,
         'group2': group2,
         'samples': group1 + group2,
-        'ref': fasta_ref
+        'ref': fasta_ref,
+        'computing_threads': cores_per_job,
+        'io_threads': cores_per_job
     }
 
     optional_parameters = get_default_optional_parameters()
@@ -72,7 +74,7 @@ def read_samples_from_file(sample_file):
         return f.read().splitlines()
 
 
-def create_config(use_sample_files, genome_build, fastq_dir, reference_fasta, group1, group2, output_dir, target_yaml):
+def create_config(use_sample_files, genome_build, cores_per_job, fastq_dir, reference_fasta, group1, group2, output_dir, target_yaml):
 
     if (use_sample_files):
 
@@ -84,6 +86,6 @@ def create_config(use_sample_files, genome_build, fastq_dir, reference_fasta, gr
         samples_in_group1 = group1.split(',')
         samples_in_group2 = group2.split(',')
 
-    config_yaml = get_default_config(fastq_dir, reference_fasta, samples_in_group1, samples_in_group2, genome_build, output_dir)
+    config_yaml = get_default_config(fastq_dir, reference_fasta, samples_in_group1, samples_in_group2, genome_build, cores_per_job, output_dir)
 
     dump_config(config_yaml, target_yaml)
