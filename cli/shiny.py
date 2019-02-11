@@ -2,6 +2,7 @@ import subprocess
 import tempfile
 import shutil
 import os
+import atexit
 
 
 def dump_dirs_to_file(project_dirs, target_file):
@@ -18,16 +19,16 @@ def get_shiny_starting_command_string(host, port):
 
     return 'shiny::runApp(appDir = "{}", host = "{}", port = {})'.format(shiny_code_dir, host, port)
 
+
 def start_shiny(project_dirs, host, port):
 
     shiny_workdir = tempfile.mkdtemp()
+    atexit.register(shutil.rmtree, shiny_workdir)
 
     projects_file = os.path.join(shiny_workdir, 'projects.txt')
     multiqc_dir = os.path.join(shiny_workdir, 'multiqc')
 
     dump_dirs_to_file(project_dirs, projects_file)
-
-    print(shiny_workdir)
 
     shiny_running_command = [
         'Rscript',
@@ -37,5 +38,3 @@ def start_shiny(project_dirs, host, port):
     ]
 
     subprocess.run(shiny_running_command)
-
-    shutil.rmtree(shiny_workdir)
