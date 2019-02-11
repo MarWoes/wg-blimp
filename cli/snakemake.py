@@ -9,12 +9,9 @@ snakefile_location = os.path.join(script_dir,'..','snakemake', 'Snakefile')
 
 def run_snakemake_from_config(dry_run, config_yaml, delete_all_output=False, cores=1):
 
-    config_dir= os.path.dirname(os.path.realpath(config_yaml))
-
     snakemake.snakemake(
         snakefile=snakefile_location,
         configfile=config_yaml,
-        workdir=config_dir,
         dryrun=dry_run,
         cores=cores,
         printshellcmds=True,
