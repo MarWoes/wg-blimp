@@ -3,3 +3,5 @@ snakemake/.snakemake
 *.RData
 cli/__pycache__/
 wg_blimp.egg-info/
+.Rproj.user
+shiny/multiqc
