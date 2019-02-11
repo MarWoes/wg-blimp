@@ -1,3 +1,5 @@
+options(repos = c(CRAN = "https://cran.rstudio.com"))
+
 shiny.wgbs.loadOrInstall <- function (packageName, type = "CRAN") {
 
   isPackageInstalled <- packageName %in% rownames(installed.packages())
