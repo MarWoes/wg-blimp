@@ -21,3 +21,9 @@ dependencies:
   - r-data.table
   - r-upsetr
   - r-stringr
+  - r-shiny
+  - r-shinydashboard
+  - r-ggplot2
+  - r-htmlwidgets
+  - r-dt
+  - r-httpuv
