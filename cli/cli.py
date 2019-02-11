@@ -61,6 +61,6 @@ def delete_all_output(dry_run, config_yaml):
 @click.option('--host', default="0.0.0.0", help="Host ip for shiny to listen on.")
 @click.option('--port', default=9898, help='Shiny port number.')
 @click.argument('project_dirs', nargs=-1, required=True)
-def run_shiny(project_dirs, host, port):
+def run_shiny(host, port, project_dirs):
 
     cli.shiny.start_shiny(project_dirs, host, port)

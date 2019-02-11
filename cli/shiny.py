@@ -9,7 +9,9 @@ def dump_dirs_to_file(project_dirs, target_file):
 
     with (open(target_file, 'w')) as f:
 
-        f.write('{}\n'.format(project_dirs))
+        for dir in project_dirs:
+
+            f.write('{}\n'.format(dir))
 
 
 def get_shiny_starting_command_string(host, port):
