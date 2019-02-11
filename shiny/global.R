@@ -12,8 +12,9 @@ shiny.wgbs.loadOrInstall <- function (packageName, type = "CRAN") {
 
     } else if (type == "bioc") {
 
-      source("https://bioconductor.org/biocLite.R")
-      biocLite(packageName)
+      if (!requireNamespace("BiocManager", quietly = TRUE))
+        install.packages("BiocManager")
+      BiocManager::install(packageName, version = "3.8")
 
     }
 
@@ -26,16 +27,10 @@ cranPackages <- c(
   "shiny",
   "shinydashboard",
   "data.table",
-  "httr",
   "ggplot2",
   "htmlwidgets",
   "DT",
   "httpuv"
-)
-
-biocPackages <- c(
-  "biomaRt",
-  "rentrez"
 )
 
 for (package in cranPackages) {
@@ -44,11 +39,6 @@ for (package in cranPackages) {
 
 }
 
-for (package in biocPackages) {
-
-  shiny.wgbs.loadOrInstall(package, type = "bioc")
-
-}
 
 shiny.wgbs.annotatedDMRColumns <- c(
   "chr",
