@@ -7,8 +7,8 @@ min_diff:
 min_cov:
   5
 rawsuffixregex:
-  first:  '_1\.fastq'
-  second: '_2\.fastq'
+  first:  '(_1|_R1_[0-9]+)\.(fastq|fq)(\.gz)?'
+  second: '(_2|_R2_[0-9]+)\.(fastq|fq)(\.gz)?'
 target_files: [
   'dmr/annotated-dmrs.csv',
   'qc/multiqc_report.html',
