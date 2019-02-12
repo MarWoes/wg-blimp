@@ -67,6 +67,7 @@ The following entries are used for running the Snakemake pipeline and may be spe
 | *group1* | Samples in first group for DMR analysis |
 | *group2* | Samples in second group for DMR analysis |
 | *io_threads* | IO intensive tools virtually reserve this many cores (while actually using only one) to reduce file system IO load. |
+| *methylation_rate_on_chromosomes* | Compute methylation rates for these chromosome during qc |
 | *min_cov* | Minimum average coverage for methylation calling |
 | *min_cpg* | Minimum number of CpGs in a DMR to be called |
 | *min_diff* | Minimum average difference between the two groups for DMR calling |

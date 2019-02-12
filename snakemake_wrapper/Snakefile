@@ -185,6 +185,8 @@ rule methylation_metrics:
         methylation_metrics = qc_dir + '/methylation_metrics.csv'
     log:
         log_dir + '/methylation_metrics.log'
+    params:
+        methylation_rate_on_chromosomes = config['methylation_rate_on_chromosomes']
     script:
         'scripts/methylationMetrics.R'
 

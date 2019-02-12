@@ -43,3 +43,4 @@ repeat_masker_links: {
   'annotation/repeat-masker-hg38.csv.gz': 'https://uni-muenster.sciebo.de/s/LwMik3kKY83oVT0/download',
   'annotation/repeat-masker-hg19.csv.gz': 'https://uni-muenster.sciebo.de/s/tFPOT7weAc5eGLG/download'
 }
+methylation_rate_on_chromosomes: []

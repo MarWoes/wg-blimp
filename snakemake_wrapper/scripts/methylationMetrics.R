@@ -16,7 +16,7 @@ wgbs.methylation.computeMeanMethylation <- function(methylationTable) {
 
 }
 
-wgbs.methylation.computeMethylationMetrics <- function(bedGraphFiles, methylationMetricsFile, conversionChromosomes = c("MT", "LAMBDA")) {
+wgbs.methylation.computeMethylationMetrics <- function(bedGraphFiles, methylationMetricsFile, conversionChromosomes) {
 
   methylationValues <- lapply(bedGraphFiles, fread, skip = 1)
 
@@ -27,23 +27,30 @@ wgbs.methylation.computeMethylationMetrics <- function(bedGraphFiles, methylatio
 
   names(methylationValues) <- sampleNames
 
-  conversionRates <- sapply(methylationValues, function (sampleValues) {
+  methylationMetrics <- data.table(
+    sample = names(methylationValues),
+    `methylation (total)` = sapply(methylationValues, wgbs.methylation.computeMeanMethylation)
+  )
 
-    chromosomeConversionRates <- sapply(conversionChromosomes, function(chr) {
+  if (length(conversionChromosomes) > 0) {
+  
+    conversionRates <- data.table(do.call(rbind, sapply(methylationValues, function (sampleValues) {
+  
+      chromosomeConversionRates <- sapply(conversionChromosomes, function(chr) {
 
-      valuesOnChromosome <- sampleValues[V1 == chr]
+        valuesOnChromosome <- sampleValues[V1 == chr]
+  
+        return(wgbs.methylation.computeMeanMethylation(valuesOnChromosome))
+  
+      })
+  
+      return(chromosomeConversionRates)
+    }, simplify = FALSE)))
 
-      return(1 - wgbs.methylation.computeMeanMethylation(valuesOnChromosome))
-
-    })
-
-    return(chromosomeConversionRates)
-  })
-
-  rownames(conversionRates) <- paste("conversion (", conversionChromosomes, ")", sep = "")
-
-  methylationMetrics <- cbind(data.table(sample = names(methylationValues)), t(conversionRates))
-  methylationMetrics$methylation <- sapply(methylationValues, wgbs.methylation.computeMeanMethylation)
+    colnames(conversionRates) <- paste("methylation (", conversionChromosomes, ")", sep = "")
+    
+    methylationMetrics <- cbind(methylationMetrics, conversionRates)
+  }
 
   write.table(methylationMetrics, methylationMetricsFile, row.names = FALSE)
 
@@ -51,10 +58,12 @@ wgbs.methylation.computeMethylationMetrics <- function(bedGraphFiles, methylatio
 }
 
 if (exists("snakemake")) {
+  
+  # save.image("conversion-snakemake.Rdata")
+  
   wgbs.methylation.computeMethylationMetrics(
     snakemake@input$bed_graphs,
-    snakemake@output$methylation_metrics
+    snakemake@output$methylation_metrics,
+    snakemake@params$methylation_rate_on_chromosomes
   )
-
-  # save.image("scripts/conversion-snakemake.Rdata")
 }
