@@ -9,13 +9,15 @@ library(bsseq)
 
 callDmrs <- function (methylDackelBedGraphFiles, sampleNames, group1Samples, group2Samples, threads, min_cpg, min_diff, rdatFile, csvFile, pdfFile) {
 
+  biocParallelParam <- MulticoreParam(workers = threads)
+  
   methylationData <- read.bismark(methylDackelBedGraphFiles,
-                                  sampleNames,
                                   strandCollapse = FALSE,
-                                  fileType = "cov",
-                                  mc.cores = threads)
+                                  BPPARAM = biocParallelParam)
+  
+  sampleNames(methylationData) <- sampleNames
 
-  smoothedData <- BSmooth(methylationData, mc.cores = threads, verbose = TRUE)
+  smoothedData <- BSmooth(methylationData, BPPARAM = biocParallelParam, verbose = TRUE)
 
   # add some color for later plotting
   pData <- pData(smoothedData)
@@ -48,6 +50,7 @@ callDmrs <- function (methylDackelBedGraphFiles, sampleNames, group1Samples, gro
 
 if (exists("snakemake")) {
 
+  #save.image(file = "snakemake.Rdata")
   callDmrs(snakemake@input$meth,
            snakemake@config$samples,
            snakemake@config$group1,
@@ -58,6 +61,6 @@ if (exists("snakemake")) {
            snakemake@output$rdata,
            snakemake@output$csv,
            snakemake@output$pdf)
-  # save.image(file = "snakemake.Rdata")
+  
 
 }
