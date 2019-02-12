@@ -4,7 +4,7 @@ import cli.config
 
 # get right directory, see https://stackoverflow.com/questions/4934806/how-can-i-find-scripts-directory-with-python
 script_dir = os.path.dirname(os.path.realpath(__file__))
-snakefile_location = os.path.join(script_dir,'..','snakemake', 'Snakefile')
+snakefile_location = os.path.join(script_dir,'..','snakemake_wrapper', 'Snakefile')
 
 
 def run_snakemake_from_config(dry_run, config_yaml, delete_all_output=False, cores=1):
