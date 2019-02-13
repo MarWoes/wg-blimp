@@ -1,3 +1,7 @@
+<p align="center">
+    <img height="150" src="https://uni-muenster.sciebo.de/s/HMY3W1CW6GAwm85/download">
+</p>
+
 `wg-blimp` (Whole Genome BisuLfIte sequencing Methylation analysis Pipeline) can be utilised to analyse WGBS data. It performs alignment, qc, methylation calling, DMR calling and DMR annotation using a multitude of tools.
 
 ## Requirements
@@ -28,6 +32,20 @@ The command `wg-blimp run-snakemake` will run the pipeline with its default para
 
 However, in case the default configurations are not sufficient, users can provide their own configurations. The commands `wg-blimp create-config` and `wg-blimp run-snakemake-from-config` can be used for this purpose.
 
+`wg-blimp` will attempt to match .fastq files to sample names by searching for sample names in .fastq file names. By default Illumina naming conventions are expected, e.g. for a samples _test1_ the .fastq files should be named as follows:
+```
+test1_L001_R1_001.fastq.gz
+test1_L001_R1_002.fastq.gz
+test1_L001_R2_001.fastq.gz
+test1_L001_R2_002.fastq.gz
+test1_L002_R1_001.fastq.gz
+test1_L002_R1_002.fastq.gz
+test1_L002_R2_001.fastq.gz
+test1_L002_R2_002.fastq.gz
+```
+
+If names derive from this pattern, users can adjust the regular expression to match in the config file's `rawsuffixregex` entry.
+
 The folder structure created by `wg-blimp run-snakemake` will look as follows:
 
 * alignment - contains all bam/bai files
@@ -37,6 +55,8 @@ The folder structure created by `wg-blimp run-snakemake` will look as follows:
 * qc - multiqc and other qc related files
 * raw - text files describing which fastq files have been used for each sample
 * config.yaml - configuration file used for the analysis
+
+It is recommended to check the *raw* folder if all samples contain the correct raw fastq source files.
 
 ### Shiny GUI
 
@@ -73,6 +93,7 @@ The following entries are used for running the Snakemake pipeline and may be spe
 | *min_diff* | Minimum average difference between the two groups for DMR calling |
 | *output_dir* | Directory containing all files created by the pipeline |
 | *promoter_tss_distances* | Distance interval around TSS's to be recognized as promoters in DMR annotation. |
+| *rawsuffixregex* | The regular expressions to match for paired reads. By default, Illumina naming conventions are accepted. |
 | *rawdir* | Directory containing .fastq files |
 | *ref* | .fasta reference file |
 | *repeat_masker_annotation_file* | File containing repeat masker annotation |
