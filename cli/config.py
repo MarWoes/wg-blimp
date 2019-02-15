@@ -1,11 +1,14 @@
+import os
 from ruamel.yaml import YAML
+
+script_dir = os.path.dirname(os.path.realpath(__file__))
 
 CGI_LOCATION_FILE    = 'annotation/cgi-locations-{}.csv.gz'
 GENE_ANNOTATION_FILE = 'annotation/gene-locations-{}.csv.gz'
 REPEAT_MASKER_FILE   = 'annotation/repeat-masker-{}.csv.gz'
 TSS_FILE             = 'annotation/transcription-start-sites-{}.csv.gz'
 
-DEFAULT_OPTIONALS_FILE = 'cli/optionals.yaml'
+DEFAULT_OPTIONALS_FILE = os.path.join(script_dir, 'optionals.yaml')
 
 yaml = YAML(typ='safe')
 yaml.default_flow_style = False

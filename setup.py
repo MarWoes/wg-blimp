@@ -26,6 +26,9 @@ setuptools.setup(
         ],
         'shiny': [
             '*.R'
+        ],
+        'cli': [
+            'optionals.yaml'
         ]
     },
     install_requires=[
