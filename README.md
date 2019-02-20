@@ -5,15 +5,17 @@
 `wg-blimp` (Whole Genome BisuLfIte sequencing Methylation analysis Pipeline) can be utilised to analyse WGBS data. It performs alignment, qc, methylation calling, DMR calling and DMR annotation using a multitude of tools.
 
 ## Requirements
-To run `wg-blimp` you need a UNIX environment that contains an installation of [Bioconda](http://bioconda.github.io/).
+To run `wg-blimp` you need a UNIX environment that contains a [Bioconda](http://bioconda.github.io/) setup.
 
 ## Installation
 
 ### Recommended
-It is advised to install `wg-blimp` through Bioconda, using:
+It is advised to install `wg-blimp` through Bioconda. It is also recommended to install `wg-blimp` in a fresh environment, as it has many dependencies that may conflict with other packages, for this you can use:
+
 ```
-conda install wg-blimp
+conda create -n wg-blimp wg-blimp python=3.6
 ```
+The requirement `python=3.6` is currently necessary because of otherwise slow conda dependency solving.
 
 ### From source
 You can also install `wg-blimp` from source using
