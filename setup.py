@@ -21,7 +21,7 @@ setuptools.setup(
         'snakemake_wrapper': [
             'annotation/*',
             'scripts/*.R',
-            'submodules/*',
+            'submodules/camel/**/*',
             'Snakefile'
         ],
         'shiny': [
