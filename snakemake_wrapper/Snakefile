@@ -38,8 +38,8 @@ rule find_fqs:
         second_regex = config['rawsuffixregex']['second']
     shell:
         """
-        find {params.rawdir} -type f | grep -E '.*{wildcards.sample}.*{params.first_regex}'  | sort > {output.first}
-        find {params.rawdir} -type f | grep -E '.*{wildcards.sample}.*{params.second_regex}' | sort > {output.second}
+        find {params.rawdir} | grep -E '.*{wildcards.sample}.*{params.first_regex}'  | sort > {output.first}
+        find {params.rawdir} | grep -E '.*{wildcards.sample}.*{params.second_regex}' | sort > {output.second}
         """
 
 rule bwameth_indexing:
