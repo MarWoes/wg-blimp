@@ -3,14 +3,15 @@
 set -e
 set -o pipefail
 
-NUM_CORES_AVAILABLE=$(nproc --all)
+NUM_CORES_AVAILABLE=4 #$(nproc --all)
 
-CREATED_CONFIG_TEST_DIR=$(mktemp -d)
+CREATED_CONFIG_TEST_DIR=testing #$(mktemp -d)
+mkdir -p $CREATED_CONFIG_TEST_DIR
 
 wg-blimp create-config \
   --cores-per-job=$NUM_CORES_AVAILABLE \
   $(realpath test/fastq/) \
-  $(realpath /scripts/test/lambda-phage.fa) \
+  $(realpath test/lambda-phage.fa) \
   simulated1,simulated2 \
   simulated3,simulated4 \
   $CREATED_CONFIG_TEST_DIR  \
@@ -28,7 +29,7 @@ wg-blimp create-config \
   --cores-per-job=$NUM_CORES_AVAILABLE \
   --use-sample-files \
   $(realpath test/fastq/) \
-  $(realpath /scripts/test/lambda-phage.fa) \
+  $(realpath test/lambda-phage.fa) \
   $CREATED_CONFIG_TEST_DIR/g1.txt \
   $CREATED_CONFIG_TEST_DIR/g2.txt \
   $CREATED_CONFIG_TEST_DIR  \
@@ -53,7 +54,7 @@ wg-blimp run-snakemake \
   --cores=$NUM_CORES_AVAILABLE \
   --use-sample-files \
   $(realpath test/fastq/) \
-  $(realpath /scripts/test/lambda-phage.fa) \
+  $(realpath test/lambda-phage.fa) \
   $CREATED_CONFIG_TEST_DIR/g1.txt \
   $CREATED_CONFIG_TEST_DIR/g2.txt \
   $CREATED_CONFIG_TEST_DIR
@@ -63,4 +64,4 @@ echo "[INFO] Deleting files again"
 wg-blimp delete-all-output --yes $CREATED_CONFIG_TEST_DIR/config.yaml
 
 echo "[INFO] Removing folder"
-rm -r $CREATED_CONFIG_TEST_DIR
+#rm -r $CREATED_CONFIG_TEST_DIR

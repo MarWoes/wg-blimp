@@ -9,6 +9,7 @@ snakemake_dir = sys.path[0]
 output_dir = config['output_dir']
 alignment_dir = output_dir + '/alignment'
 log_dir = output_dir + '/logs'
+benchmark_dir = log_dir + '/benchmarks'
 methylation_dir = output_dir + '/methylation'
 qc_dir = output_dir + '/qc'
 dmr_dir = output_dir + '/dmr'
@@ -22,9 +23,12 @@ io_threads = config['io_threads']
 
 ref_fasta = config['ref']
 
+target_files = [ output_dir + '/' + outfile for outfile in config['target_files']]
+runtime_report = qc_dir + '/runtime.pdf'
+
 rule all:
     input:
-        [ output_dir + '/' + outfile for outfile in config['target_files']]
+        target_files + [ runtime_report ]
 
 ### ALIGNMENT
 
@@ -83,6 +87,8 @@ rule bwameth_align:
         log_dir + '/{sample}.align.log'
     threads:
         num_threads
+    benchmark:
+        benchmark_dir + '/alignment/{sample}.tsv'
     shell:
         """
         FQ1=$(cat {input.first} | tr '\n' ',')
@@ -100,6 +106,8 @@ rule sort_bam:
         log_dir + '/{sample}.sorting.log'
     threads:
         num_threads
+    benchmark:
+        benchmark_dir + '/sorting/{sample}.tsv'
     shell:
         'samtools sort -o {output} -@ {threads} {input} 2> {log}'
 
@@ -112,6 +120,8 @@ rule mark_duplicates:
         metrics = temp(alignment_dir + '/{sample}-dup-metrics.txt')
     log:
         log_dir + '/{sample}.mark_duplicates.log'
+    benchmark:
+        benchmark_dir + '/deduplication/{sample}.tsv'
     shell:
         'picard MarkDuplicates I={input} O={output.bam} M={output.metrics} &> {log}'
 
@@ -121,6 +131,8 @@ rule index_bam:
         bam = alignment_dir + '/{sample}.bam'
     output:
         alignment_dir + '/{sample}.bai'
+    benchmark:
+        benchmark_dir + '/indexing/{sample}.tsv'
     shell:
         'samtools index {input} {output}'
 
@@ -134,6 +146,8 @@ rule fastqc:
         qc_dir + '/fastqc/{sample}_fastqc.html'
     log:
         log_dir + '/{sample}.fastqc.log'
+    benchmark:
+        benchmark_dir + '/fastqc/{sample}.tsv'
     shell:
         'fastqc -o $(dirname {output}) {input.bam} &> {log}'
 
@@ -147,6 +161,8 @@ rule picard_metrics:
         hist      = temp(qc_dir +'/picard-metrics/{sample}-hist.pdf')
     log:
         log_dir + '/{sample}.picard_metrics.log'
+    benchmark:
+        benchmark_dir + '/picard_metrics/{sample}.tsv'
     shell:
         """
         picard CollectAlignmentSummaryMetrics R={input.ref} I={input.bam} O={output.alignment} &> {log}
@@ -162,6 +178,8 @@ rule qualimap:
         io_threads
     log:
         log_dir + '/{sample}.qualimap.log'
+    benchmark:
+        benchmark_dir + '/qualimap/{sample}.tsv'
     shell:
         'qualimap bamqc -bam {input} -outdir $(dirname {output}) -nt {threads} --java-mem-size=16G &> {log} '
 
@@ -175,6 +193,8 @@ rule multiqc:
         qc_dir + '/multiqc_report.html'
     log:
         log_dir + '/multiqc.log'
+    benchmark:
+        benchmark_dir + '/multiqc.tsv'
     shell:
         'multiqc -f -o {qc_dir} {qc_dir}/fastqc {qc_dir}/picard-metrics {qc_dir}/qualimap &> {log} '
 
@@ -187,6 +207,8 @@ rule methylation_metrics:
         log_dir + '/methylation_metrics.log'
     params:
         methylation_rate_on_chromosomes = config['methylation_rate_on_chromosomes']
+    benchmark:
+        benchmark_dir + '/methylation_metrics.tsv'
     script:
         'scripts/methylationMetrics.R'
 
@@ -202,6 +224,8 @@ rule methyl_dackel:
     params:
         min_cov  = config['min_cov'],
         methylation_dir = methylation_dir
+    benchmark:
+        benchmark_dir + '/methylation_calling/{sample}.tsv'
     shell:
         'MethylDackel extract --mergeContext -o {params.methylation_dir}/{wildcards.sample} {input.ref} {input.bam}'
 
@@ -212,6 +236,8 @@ rule bedgraph_to_methylation_ratio:
         bedGraph = temp(methylation_dir + '/{sample}_CpG_ratio.bedGraph')
     log:
         log_dir + '/{sample}.bedgraph_to_methylation_ratio.log'
+    benchmark:
+        benchmark_dir + '/metilene/{sample}.transformation.tsv'
     script:
         'scripts/transformBedGraph.R'
 
@@ -224,6 +250,8 @@ rule metilene_input:
     params:
         g1_header = ' '.join([ 'g1_' + s for s in config['group1']]),
         g2_header = ' '.join([ 'g2_' + s for s in config['group2']])
+    benchmark:
+        benchmark_dir + '/metilene/input.tsv'
     shell:
         'bedtools unionbedg -filler NA -header -names {params.g1_header} {params.g2_header} -i {input} > {output}'
 
@@ -236,9 +264,11 @@ rule metilene:
         min_cpg = config['min_cpg'],
         min_diff = config['min_diff']
     threads:
-        config['computing_threads']
+        1
     log:
         log_dir + '/metilene.log'
+    benchmark:
+        benchmark_dir + '/metilene/calling.tsv'
     shell:
         'metilene -m {params.min_cpg} -d {params.min_diff} -t {threads} {input} > {output} 2> {log}'
 
@@ -263,6 +293,8 @@ rule camel_call:
         snakemake_dir = snakemake_dir
     log:
         log_dir + '/{sample}.camel_call.log'
+    benchmark:
+        benchmark_dir + '/camel/{sample}.tsv'
     shell:
         'python {params.snakemake_dir}/submodules/camel/modules/call.py {input.bam} {input.index} {output} 2> {log}'
 
@@ -280,6 +312,8 @@ rule camel_dmr:
         snakemake_dir = snakemake_dir
     log:
         log_dir + '/camel.log'
+    benchmark:
+        benchmark_dir + '/camel/dmr.tsv'
     shell:
         'python {params.snakemake_dir}/submodules/camel/modules/dmr.py {input.index} --case {input.case} --control {input.control} --min_diff {params.min_diff} --min_cpg {params.min_cpg} --min_cov {params.min_cov} > {output} 2> {log}'
 
@@ -294,6 +328,8 @@ rule bsseq:
         config['io_threads']
     log:
         log_dir + '/bsseq.log'
+    benchmark:
+        benchmark_dir + '/bsseq/bsseq.tsv'
     script:
         'scripts/bsseq.R'
 
@@ -310,6 +346,8 @@ rule dmr_combination:
         bed = dmr_dir + '/dmr-coverage/combined-dmrs.bed'
     log:
         log_dir + '/dmr_combination.log'
+    benchmark:
+        benchmark_dir + '/dmr_annotation/combination.tsv'
     script:
         'scripts/dmrCombination.R'
 
@@ -323,6 +361,8 @@ rule dmr_coverage:
     params:
         min_mapq = config['annotation_min_mapq']
     threads: config['computing_threads']
+    benchmark:
+        benchmark_dir + '/dmr_coverage/{sample}.tsv'
     shell:
         'mosdepth --threads {threads} --no-per-base --mapq {params.min_mapq} --by {input.bed} $(dirname {output})/{wildcards.sample} {input.bam}'
 
@@ -351,5 +391,16 @@ rule dmr_annotation:
         tss_distances = config['promoter_tss_distances']
     log:
         log_dir + '/dmr_annotation.log'
+    benchmark:
+        benchmark_dir + '/dmr_annotation/annotation.tsv'
     script:
         'scripts/dmrAnnotation.R'
+
+rule benchmark_plot:
+    input:
+        target_files = target_files,
+        benchmark_dir = benchmark_dir
+    output:
+        runtime_report = runtime_report
+    script:
+        'scripts/benchmarkPlot.R'
