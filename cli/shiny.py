@@ -10,7 +10,7 @@ def dump_config_paths_to_file(config_files, target_file):
     with (open(target_file, 'w')) as f:
 
         for config_file in config_files:
-            print(os.path.abspath(config_file))
+
             f.write('{}\n'.format(os.path.abspath(config_file)))
 
 
