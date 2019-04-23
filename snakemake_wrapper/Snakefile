@@ -398,9 +398,10 @@ rule dmr_annotation:
 
 rule benchmark_plot:
     input:
-        target_files = target_files,
-        benchmark_dir = benchmark_dir
+        target_files = target_files
     output:
         runtime_report = runtime_report
+    params:
+        benchmark_dir = benchmark_dir
     script:
         'scripts/benchmarkPlot.R'

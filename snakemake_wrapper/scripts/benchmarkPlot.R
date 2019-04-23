@@ -2,19 +2,19 @@ library(ggplot2)
 library(stringr)
 library(data.table)
 
-benchmarkDir <- snakemake@input$benchmark_dir
+benchmarkDir <- snakemake@params$benchmark_dir
 targetPlot <- snakemake@output$runtime_report
 
 benchmarkFiles <- list.files(benchmarkDir, recursive = TRUE, pattern = ".tsv")
 
 benchmarkReports <- lapply(benchmarkFiles, function (file) {
-  
+
   task <- str_remove_all(file, fixed(".tsv"))
   fullPath <- paste0(benchmarkDir, "/", file)
-  
+
   benchmarkReport <- fread(fullPath, na.strings = "-")
   benchmarkReport$task <- task
-  
+
   return(benchmarkReport)
 })
 

@@ -5,7 +5,7 @@ set -o pipefail
 
 NUM_CORES_AVAILABLE=4 #$(nproc --all)
 
-CREATED_CONFIG_TEST_DIR=testing #$(mktemp -d)
+CREATED_CONFIG_TEST_DIR=$(mktemp -d)
 mkdir -p $CREATED_CONFIG_TEST_DIR
 
 wg-blimp create-config \
@@ -64,4 +64,4 @@ echo "[INFO] Deleting files again"
 wg-blimp delete-all-output --yes $CREATED_CONFIG_TEST_DIR/config.yaml
 
 echo "[INFO] Removing folder"
-#rm -r $CREATED_CONFIG_TEST_DIR
+rm -r $CREATED_CONFIG_TEST_DIR
