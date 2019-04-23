@@ -1,13 +1,17 @@
 library(data.table)
+library(yaml)
 
-shiny.wgbs.loadDataset <- function (datasetRootPath) {
+shiny.wgbs.loadDataset <- function (configFile) {
+
+  configYaml <- read_yaml(configFile)
+
+  datasetRootPath <- configYaml$output_dir
 
   bamFileDirectory <- "alignment/"
   multiqcMetricsSubPath <- "qc/multiqc_data/multiqc_general_stats.txt"
   methylationMetricsSubPath <- "qc/methylation_metrics.csv"
   multiqcReportSubPath <- "qc/multiqc_report.html"
   annotatedDmrSubPath <- "dmr/annotated-dmrs.csv"
-  snakemakeConfigSubPath <- "config.yaml"
   qualimapSubPath <- "qc/qualimap"
 
   multiqcColumnsOfInterest <- c(
@@ -46,7 +50,7 @@ shiny.wgbs.loadDataset <- function (datasetRootPath) {
 
   }
 
-  snakemakeConfig <- readLines(paste(datasetRootPath, snakemakeConfigSubPath, sep = "/"))
+  snakemakeConfig <- readLines(configFile)
 
   # WORKAROUND: there are issues with prism.js highlighting yaml syntax with the first
   # paragraph indented by one additional tab. This can't be fixed in a 'shiny' way, so we just
@@ -70,12 +74,12 @@ shiny.wgbs.loadDataset <- function (datasetRootPath) {
   ))
 }
 
-shiny.wgbs.loadDatasets <- function (datasetsFile) {
+shiny.wgbs.loadDatasets <- function (configPathsFile) {
 
-  datasetPaths <- readLines(datasetsFile)
+  configFiles <- readLines(configPathsFile)
 
-  datasets <- lapply(datasetPaths, shiny.wgbs.loadDataset)
-  names(datasets) <- basename(datasetPaths)
+  datasets <- lapply(configFiles, shiny.wgbs.loadDataset)
+  names(datasets) <- basename(dirname(configFiles))
 
   return(datasets)
 }

@@ -5,13 +5,13 @@ import os
 import atexit
 
 
-def dump_dirs_to_file(project_dirs, target_file):
+def dump_config_paths_to_file(config_files, target_file):
 
     with (open(target_file, 'w')) as f:
 
-        for dir in project_dirs:
-
-            f.write('{}\n'.format(dir))
+        for config_file in config_files:
+            print(os.path.abspath(config_file))
+            f.write('{}\n'.format(os.path.abspath(config_file)))
 
 
 def get_shiny_starting_command_string(host, port):
@@ -22,7 +22,7 @@ def get_shiny_starting_command_string(host, port):
     return 'shiny::runApp(appDir = "{}", host = "{}", port = {})'.format(shiny_code_dir, host, port)
 
 
-def start_shiny(project_dirs, host, port):
+def start_shiny(config_files, host, port):
 
     shiny_workdir = tempfile.mkdtemp()
     atexit.register(shutil.rmtree, shiny_workdir)
@@ -30,7 +30,7 @@ def start_shiny(project_dirs, host, port):
     projects_file = os.path.join(shiny_workdir, 'projects.txt')
     multiqc_dir = os.path.join(shiny_workdir, 'multiqc')
 
-    dump_dirs_to_file(project_dirs, projects_file)
+    dump_config_paths_to_file(config_files, projects_file)
 
     shiny_running_command = [
         'Rscript',

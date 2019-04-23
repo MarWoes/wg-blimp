@@ -27,3 +27,4 @@ dependencies:
   - r-htmlwidgets
   - r-dt
   - r-httpuv
+  - r-yaml
