@@ -44,3 +44,5 @@ repeat_masker_links: {
   'annotation/repeat-masker-hg19.csv.gz': 'https://uni-muenster.sciebo.de/s/tFPOT7weAc5eGLG/download'
 }
 methylation_rate_on_chromosomes: []
+qualimap_memory_gb:
+  32
