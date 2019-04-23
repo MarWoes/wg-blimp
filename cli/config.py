@@ -42,12 +42,12 @@ def get_default_optional_parameters():
 def get_default_config(fastq_dir, fasta_ref, group1, group2, genome_build, cores_per_job, output_dir):
 
     mandatory_parameters = {
-        'rawdir': fastq_dir,
-        'output_dir': output_dir,
+        'rawdir': os.path.abspath(fastq_dir),
+        'output_dir': os.path.abspath(output_dir),
         'group1': group1,
         'group2': group2,
         'samples': group1 + group2,
-        'ref': fasta_ref,
+        'ref': os.path.abspath(fasta_ref),
         'computing_threads': cores_per_job,
         'io_threads': cores_per_job
     }
