@@ -183,7 +183,7 @@ rule qualimap:
     params:
         memory = config['qualimap_memory_gb']
     shell:
-        'qualimap bamqc -bam {input} -outdir $(dirname {output}) -nt {threads} --java-mem-size={params.memory}G &> {log} '
+        'qualimap bamqc -bam {input} -outdir $(dirname {output}) -nt {threads} --collect-overlap-pairs --skip-duplicated --java-mem-size={params.memory}G &> {log} '
 
 rule multiqc:
     input:
