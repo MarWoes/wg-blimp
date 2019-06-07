@@ -2,7 +2,7 @@
     <img height="150" src="https://uni-muenster.sciebo.de/s/HMY3W1CW6GAwm85/download">
 </p>
 
-`wg-blimp` (Whole Genome BisuLfIte sequencing Methylation analysis Pipeline) can be utilised to analyse WGBS data. It performs alignment, qc, methylation calling, DMR calling and DMR annotation using a multitude of tools.
+`wg-blimp` (Whole Genome BisuLfIte sequencing Methylation analysis Pipeline) can be utilised to analyse WGBS data. It performs alignment, qc, methylation calling, DMR calling and DMR annotation using a multitude of tools. First time using `wg-blimp`? We recommend having a look at our [step-by-step guide](https://github.com/MarWoes/wg-blimp/wiki/Tutorial).
 
 ## Requirements
 To run `wg-blimp` you need a UNIX environment that contains a [Bioconda](http://bioconda.github.io/) setup.
