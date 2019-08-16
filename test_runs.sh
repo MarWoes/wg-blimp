@@ -3,7 +3,7 @@
 set -e
 set -o pipefail
 
-NUM_CORES_AVAILABLE=4 #$(nproc --all)
+NUM_CORES_AVAILABLE=$(nproc --all)
 
 CREATED_CONFIG_TEST_DIR=$(mktemp -d)
 mkdir -p $CREATED_CONFIG_TEST_DIR

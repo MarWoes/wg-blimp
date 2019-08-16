@@ -12,6 +12,7 @@ log_dir = output_dir + '/logs'
 benchmark_dir = log_dir + '/benchmarks'
 methylation_dir = output_dir + '/methylation'
 qc_dir = output_dir + '/qc'
+mbias_dir = qc_dir + '/mbias'
 dmr_dir = output_dir + '/dmr'
 metilene_dir = dmr_dir + '/metilene'
 bsseq_dir = dmr_dir + '/bsseq'
@@ -25,10 +26,15 @@ ref_fasta = config['ref']
 
 target_files = [ output_dir + '/' + outfile for outfile in config['target_files']]
 runtime_report = qc_dir + '/runtime.pdf'
+mbias_ob_reports = expand(mbias_dir + '/{sample}_OB.svg', sample = config['samples'])
+mbias_ot_reports = expand(mbias_dir + '/{sample}_OT.svg', sample = config['samples'])
 
 rule all:
     input:
-        target_files + [ runtime_report ]
+        target_files +
+        [ runtime_report ] +
+        mbias_ob_reports +
+        mbias_ot_reports
 
 ### ALIGNMENT
 
@@ -184,6 +190,22 @@ rule qualimap:
         memory = config['qualimap_memory_gb']
     shell:
         'qualimap bamqc -bam {input} -outdir $(dirname {output}) -nt {threads} --collect-overlap-pairs --skip-duplicated --java-mem-size={params.memory}G &> {log} '
+
+rule mbias:
+    input:
+        fasta_ref = ref_fasta,
+        fasta_index = ref_fasta + '.fai',
+        bam_file = alignment_dir + '/{sample}.bam',
+        bam_index = alignment_dir + '/{sample}.bai'
+    log:
+        log_dir + '/{sample}_mbias.log'
+    benchmark:
+        benchmark_dir + '/{sample}_mbias.tsv'
+    output:
+        mbias_ot = mbias_dir + '/{sample}_OT.svg',
+        mbias_ob = mbias_dir + '/{sample}_OB.svg'
+    shell:
+        'MethylDackel mbias {input.fasta_ref} {input.bam_file} {mbias_dir}/{wildcards.sample} &> {log}'
 
 rule multiqc:
     input:
