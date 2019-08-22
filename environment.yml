@@ -1,4 +1,4 @@
-name: wgbs-imi
+name: wg-blimp-dev
 channels:
   - conda-forge
   - bioconda
@@ -16,6 +16,7 @@ dependencies:
   - metilene
   - bedtools
   - bioconductor-bsseq
+  - bioconductor-methylseekr
   - pysam
   - h5py
   - r-data.table

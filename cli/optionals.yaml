@@ -12,7 +12,8 @@ rawsuffixregex:
 target_files: [
   'dmr/annotated-dmrs.csv',
   'qc/multiqc_report.html',
-  'qc/methylation_metrics.csv'
+  'qc/methylation_metrics.csv',
+  'segmentation/segments.csv'
 ]
 dmr_tools: [
   'bsseq',
@@ -44,5 +45,6 @@ repeat_masker_links: {
   'annotation/repeat-masker-hg19.csv.gz': 'https://uni-muenster.sciebo.de/s/tFPOT7weAc5eGLG/download'
 }
 methylation_rate_on_chromosomes: []
+methylseekr_pmd_chromosome: '22'
 qualimap_memory_gb:
   32

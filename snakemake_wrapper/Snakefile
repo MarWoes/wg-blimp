@@ -13,6 +13,7 @@ benchmark_dir = log_dir + '/benchmarks'
 methylation_dir = output_dir + '/methylation'
 qc_dir = output_dir + '/qc'
 mbias_dir = qc_dir + '/mbias'
+segmentation_dir = output_dir + '/segmentation'
 dmr_dir = output_dir + '/dmr'
 metilene_dir = dmr_dir + '/metilene'
 bsseq_dir = dmr_dir + '/bsseq'
@@ -419,6 +420,28 @@ rule dmr_annotation:
         benchmark_dir + '/dmr_annotation/annotation.tsv'
     script:
         'scripts/dmrAnnotation.R'
+
+### SEGMENTATION
+
+rule methylseekr:
+    input:
+        ref = ref_fasta,
+        methylation_table = expand(methylation_dir + '/{sample}_CpG.bedGraph', sample = config['samples'])
+    output:
+        alpha_distribution = segmentation_dir + '/segments.csv',
+        sample_dirs = directory(expand(segmentation_dir + '/{sample}', sample = config['samples']))
+    params:
+        target_dir = segmentation_dir,
+        samples = config['samples'],
+        methylation_dir = methylation_dir,
+        calibration_chr = config['methylseekr_pmd_chromosome'],
+        genome_build = config['methylseekr_cgi_genome']
+    threads:
+        num_threads
+    script:
+        'scripts/methylseekRSegmentation.R'
+
+### BENCHMARKING
 
 rule benchmark_plot:
     input:

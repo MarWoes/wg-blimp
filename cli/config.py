@@ -26,7 +26,9 @@ def get_reference_annotation_files(genome_build):
           REPEAT_MASKER_FILE.format(genome_build),
 
         'transcript_start_site_file':
-          TSS_FILE.format(genome_build)
+          TSS_FILE.format(genome_build),
+
+        'methylseekr_cgi_genome': genome_build
     }
 
 
