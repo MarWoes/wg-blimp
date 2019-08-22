@@ -429,7 +429,9 @@ rule methylseekr:
         methylation_table = expand(methylation_dir + '/{sample}_CpG.bedGraph', sample = config['samples'])
     output:
         alpha_distribution = segmentation_dir + '/segments.csv',
-        sample_dirs = directory(expand(segmentation_dir + '/{sample}', sample = config['samples']))
+        pmd_segments = expand(segmentation_dir + '/{sample}/pmd-segments.tab', sample = config['samples']),
+        umr_lmr_with_pmd = expand(segmentation_dir + '/{sample}/LMRUMRwithPMD/umr-lmr.tab', sample = config['samples']),
+        umr_lmr_without_pmd = expand(segmentation_dir + '/{sample}/LMRUMRwithoutPMD/umr-lmr.tab', sample = config['samples'])
     params:
         target_dir = segmentation_dir,
         samples = config['samples'],
