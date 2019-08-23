@@ -430,8 +430,8 @@ rule methylseekr:
     output:
         alpha_distribution = segmentation_dir + '/segments.csv',
         pmd_segments = expand(segmentation_dir + '/{sample}/pmd-segments.csv', sample = config['samples']),
-        umr_lmr_with_pmd = expand(segmentation_dir + '/{sample}/LMRUMRwithPMD/umr-lmr.tab', sample = config['samples']),
-        umr_lmr_without_pmd = expand(segmentation_dir + '/{sample}/LMRUMRwithoutPMD/umr-lmr.tab', sample = config['samples'])
+        umr_lmr_with_pmd = expand(segmentation_dir + '/{sample}/LMRUMRwithPMD/umr-lmr.csv', sample = config['samples']),
+        umr_lmr_without_pmd = expand(segmentation_dir + '/{sample}/LMRUMRwithoutPMD/umr-lmr.csv', sample = config['samples'])
     params:
         target_dir = segmentation_dir,
         samples = config['samples'],

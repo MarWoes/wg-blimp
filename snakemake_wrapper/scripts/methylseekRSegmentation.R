@@ -8,7 +8,7 @@ library(parallel)
 
 ### FUNCTIONS
 
-segmentIntoUMRsAndLMRs <- function(methylationRanges, cgiRanges, numThreads, targetDir, genomeSeq, seqLengths, pmdSegments) {
+segmentIntoUMRsAndLMRs <- function(sample, methylationRanges, cgiRanges, numThreads, targetDir, genomeSeq, seqLengths, pmdSegments) {
 
   fdrStats <- calculateFDRs(
     m = methylationRanges,
@@ -42,10 +42,19 @@ segmentIntoUMRsAndLMRs <- function(methylationRanges, cgiRanges, numThreads, tar
     pdfFilename = paste0(targetDir, "/umr-lmr-segmentation.pdf")
   )
 
-  saveUMRLMRSegments(
-    segments,
-    TableFilename = paste0(targetDir, "/umr-lmr.tab")
+  umrLmrTable <- data.table(
+    sample = sample,
+    chr = as.character(seqnames(segments)),
+    start = start(segments),
+    end = end(segments),
+    type = values(segments)$type,
+    num_cpgs_filtered = values(segments)$nCG.segmentation,
+    num_cpgs_ref = values(segments)$nCG,
+    mean_methylation = values(segments)$pmeth,
+    median_methylation = values(segments)$median.meth
   )
+
+  fwrite(umrLmrTable, file = paste0(targetDir, "/umr-lmr.csv"))
 }
 
 loadOrInstall <- function(packageName) {
@@ -143,6 +152,7 @@ for (sample in samples) {
   fwrite(pmdSegmentTable, file = paste0(targetDir, "/", sample, "/pmd-segments.csv"))
 
   segmentIntoUMRsAndLMRs(
+    sample = sample,
     methylationRanges = sampleRanges,
     cgiRanges = cgiRanges,
     numThreads = numThreads,
@@ -153,6 +163,7 @@ for (sample in samples) {
   )
 
   segmentIntoUMRsAndLMRs(
+    sample = sample,
     methylationRanges = sampleRanges,
     cgiRanges = cgiRanges,
     numThreads = numThreads,
