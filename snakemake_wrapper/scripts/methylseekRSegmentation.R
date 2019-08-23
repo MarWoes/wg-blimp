@@ -50,7 +50,8 @@ segmentIntoUMRsAndLMRs <- function(sample, methylationRanges, cgiRanges, numThre
     num_cpgs_filtered = values(segments)$nCG.segmentation,
     num_cpgs_ref = values(segments)$nCG,
     mean_methylation = values(segments)$pmeth,
-    median_methylation = values(segments)$median.meth
+    median_methylation = values(segments)$median.meth,
+    pmd_included = !(length(pmdSegments) == 1 && is.na(pmdSegments))
   )
 
   if (!sequencesStartingWithChr) {
