@@ -7,8 +7,7 @@ library(parallel)
 
 
 ### FUNCTIONS
-
-segmentIntoUMRsAndLMRs <- function(sample, methylationRanges, cgiRanges, numThreads, targetDir, genomeSeq, seqLengths, pmdSegments) {
+segmentIntoUMRsAndLMRs <- function(sample, methylationRanges, cgiRanges, numThreads, targetDir, genomeSeq, seqLengths, pmdSegments, sequencesStartingWithChr) {
 
   fdrStats <- calculateFDRs(
     m = methylationRanges,
@@ -53,6 +52,10 @@ segmentIntoUMRsAndLMRs <- function(sample, methylationRanges, cgiRanges, numThre
     mean_methylation = values(segments)$pmeth,
     median_methylation = values(segments)$median.meth
   )
+
+  if (!sequencesStartingWithChr) {
+    umrLmrTable$chr <- str_remove(umrLmrTable$chr, "^chr")
+  }
 
   fwrite(umrLmrTable, file = paste0(targetDir, "/umr-lmr.csv"))
 }
@@ -113,6 +116,9 @@ for (sample in samples) {
     col.names = c("chr", "start", "end", "methPercent", "methylated", "unmethylated")
   )
 
+  # restore 'non-chr' notation after computation is done
+  sequencesStartingWithChr <- any(str_count(methylationValues$chr, "^chr")) > 0
+
   # adjust possibly faulty 'chr's here too
   methylationValues$chr <- str_replace(methylationValues$chr, "^(?!chr)", "chr")
 
@@ -149,6 +155,10 @@ for (sample in samples) {
     num_cpgs = values(pmdSegments)$nCG
   )
 
+  if (!sequencesStartingWithChr) {
+    pmdSegmentTable$chr <- str_remove(pmdSegmentTable$chr, "^chr")
+  }
+
   fwrite(pmdSegmentTable, file = paste0(targetDir, "/", sample, "/pmd-segments.csv"))
 
   segmentIntoUMRsAndLMRs(
@@ -159,7 +169,8 @@ for (sample in samples) {
     targetDir = paste0(targetDir, "/", sample, "/LMRUMRwithPMD/"),
     genomeSeq = referenceBS,
     seqLengths = seqlengths(referenceBS),
-    pmdSegments = pmdSegments
+    pmdSegments = pmdSegments,
+    sequencesStartingWithChr
   )
 
   segmentIntoUMRsAndLMRs(
@@ -170,7 +181,8 @@ for (sample in samples) {
     targetDir = paste0(targetDir, "/", sample, "/LMRUMRwithoutPMD/"),
     genomeSeq = referenceBS,
     seqLengths = seqlengths(referenceBS),
-    pmdSegments = NA
+    pmdSegments = NA,
+    sequencesStartingWithChr
   )
 
 }
