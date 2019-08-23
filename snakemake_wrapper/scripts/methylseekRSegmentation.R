@@ -5,41 +5,49 @@ library(data.table)
 library(rtracklayer)
 library(parallel)
 
+### GLOBALS
+
+FDR_CUTOFF <- 5
+METHYLATION_CUTOFF <- 0.5
+SEGMENTATION_WIDTH_PX <- 1366
+SEGMENTATION_HEIGHT_PX <- 768
+SEGMENTATION_FONT_SIZE <- 14
 
 ### FUNCTIONS
 segmentIntoUMRsAndLMRs <- function(sample, methylationRanges, cgiRanges, numThreads, targetDir, genomeSeq, seqLengths, pmdSegments, sequencesStartingWithChr) {
 
+  png(paste0(targetDir, "/fdr.stats.png"))
   fdrStats <- calculateFDRs(
     m = methylationRanges,
     CGIs = cgiRanges,
     PMDs = pmdSegments,
-    num.cores = numThreads,
-    pdfFilename = paste0(targetDir, "/fdr.stats.pdf")
+    num.cores = numThreads
   )
+  dev.off()
 
   # TODO: use other values than the default one?
-  fdrCutoff <- 5
-  methylationCutoff <- 0.5
-  selectedN <- as.integer(names(fdrStats$FDRs[as.character(methylationCutoff), ][fdrStats$FDRs[as.character(methylationCutoff), ] < fdrCutoff])[1])
+  selectedN <- as.integer(names(fdrStats$FDRs[as.character(METHYLATION_CUTOFF), ][fdrStats$FDRs[as.character(METHYLATION_CUTOFF), ] < FDR_CUTOFF])[1])
 
+  png(paste0(targetDir, "/umr-lmr-heatmap.png"))
   segments <- segmentUMRsLMRs(
     m = methylationRanges,
-    meth.cutoff = methylationCutoff,
+    meth.cutoff = METHYLATION_CUTOFF,
     nCpG.cutoff = selectedN,
     PMDs = pmdSegments,
     num.cores = numThreads,
     myGenomeSeq = genomeSeq,
-    seqLengths = seqLengths,
-    pdfFilename = paste0(targetDir, "/umr-lmr-heatmap.pdf")
+    seqLengths = seqLengths
   )
+  dev.off()
 
+  png(paste0(targetDir, "/umr-lmr-segmentation.png"), width = SEGMENTATION_WIDTH_PX, height = SEGMENTATION_HEIGHT_PX, pointsize = SEGMENTATION_FONT_SIZE)
   plotFinalSegmentation(
     m = methylationRanges,
     segs = segments,
     PMDs = pmdSegments,
-    meth.cutoff = methylationCutoff,
-    pdfFilename = paste0(targetDir, "/umr-lmr-segmentation.pdf")
+    meth.cutoff = METHYLATION_CUTOFF
   )
+  dev.off()
 
   umrLmrTable <- data.table(
     sample = sample,
@@ -127,26 +135,29 @@ for (sample in samples) {
   values(sampleRanges)$T <- methylationValues$methylated + methylationValues$unmethylated
   values(sampleRanges)$M <- methylationValues$methylated
 
+  png(paste0(targetDir, "/", sample, "/alphaCalibration.png"))
   pmdSegments <- segmentPMDs(
     m = sampleRanges,
     chr.sel = calibrationChr,
     num.cores = numThreads,
-    seqLengths = seqlengths(referenceBS),
-    pdfFilename = paste0(targetDir, "/", sample, "/alphaCalibration.pdf")
+    seqLengths = seqlengths(referenceBS)
   )
+  dev.off()
 
+  png(paste0(targetDir, "/", sample, "/alphaPMDRemoved.png"))
   plotAlphaDistributionOneChr(
     m = subsetByOverlaps(sampleRanges, pmdSegments[values(pmdSegments)$type == "notPMD"]),
     chr.sel = calibrationChr,
-    num.cores = numThreads,
-    pdfFilename = paste0(targetDir, "/", sample, "/alphaPMDRemoved.pdf")
+    num.cores = numThreads
   )
+  dev.off()
 
+  png(paste0(targetDir, "/", sample, "/pmd.png"), width = SEGMENTATION_WIDTH_PX, height = SEGMENTATION_HEIGHT_PX, pointsize = SEGMENTATION_FONT_SIZE)
   plotPMDSegmentation(
     m = sampleRanges,
-    segs = pmdSegments,
-    pdfFilename =  paste0(targetDir, "/", sample, "/pmd.pdf")
+    segs = pmdSegments
   )
+  dev.off()
 
   pmdSegmentTable <- data.table(
     sample = sample,
