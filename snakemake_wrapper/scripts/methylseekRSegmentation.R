@@ -132,7 +132,15 @@ for (sample in samples) {
     pdfFilename =  paste0(targetDir, "/", sample, "/pmd.pdf")
   )
 
-  savePMDSegments(pmdSegments, TableFilename = paste0(targetDir, "/", sample, "/pmd-segments.tab"))
+  pmdSegmentTable <- data.table(
+    sample = sample,
+    chr = as.character(seqnames(pmdSegments)),
+    start = start(pmdSegments),
+    end = end(pmdSegments),
+    num_cpgs = values(pmdSegments)$nCG
+  )
+
+  fwrite(pmdSegmentTable, file = paste0(targetDir, "/", sample, "/pmd-segments.csv"))
 
   segmentIntoUMRsAndLMRs(
     methylationRanges = sampleRanges,
