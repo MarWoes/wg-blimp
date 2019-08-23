@@ -96,6 +96,8 @@ methylationDir <- snakemake@params$methylation_dir
 calibrationChr <- snakemake@params$calibration_chr
 targetGenomeName <- snakemake@params$genome_build
 numThreads <- snakemake@threads
+targetPmdFile <- snakemake@output$pmd_all
+targetUmrLmrFile <- snakemake@output$umr_lmr_all
 
 ### SCRIPT
 
@@ -199,5 +201,11 @@ for (sample in samples) {
 
 }
 
+pmdFiles <- list.files(targetDir, pattern = "pmd-segments.csv", recursive = TRUE, full.names = TRUE)
+umrLmrFiles <- list.files(targetDir, pattern = "umr-lmr.csv", recursive = TRUE, full.names = TRUE)
 
-file.create(snakemake@output$alpha_distribution)
+pmdContents <- lapply(pmdFiles, fread)
+umrLmrContents <- lapply(umrLmrFiles, fread)
+
+fwrite(rbindlist(pmdContents), targetPmdFile)
+fwrite(rbindlist(umrLmrContents), targetUmrLmrFile)

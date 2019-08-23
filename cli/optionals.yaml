@@ -13,7 +13,7 @@ target_files: [
   'dmr/annotated-dmrs.csv',
   'qc/multiqc_report.html',
   'qc/methylation_metrics.csv',
-  'segmentation/segments.csv'
+  'segmentation/umr-lmr-all.csv'
 ]
 dmr_tools: [
   'bsseq',
