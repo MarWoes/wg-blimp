@@ -7,6 +7,7 @@ if (exists("snakemake")) {
 
 library(data.table)
 library(GenomicRanges)
+library(stringr)
 
 wgbs.annotateOverlap <- function (dmrRanges, overlapRanges, geneTable) {
 
@@ -78,7 +79,8 @@ wgbs.annotateDMRs <- function (dmrFile, gzippedCgiFile, gzippedGeneFile, gzipped
 
   dmrs$length <- dmrs$end - dmrs$start
 
-  dmrRanges  <- GRanges(seqnames = dmrs$chr, ranges = IRanges(dmrs$start, dmrs$end))
+  # remove any trailing 'chr's for range intersection
+  dmrRanges  <- GRanges(seqnames = str_remove(dmrs$chr, "^chr"), ranges = IRanges(dmrs$start, dmrs$end))
 
   dmrs <- wgbs.annotateGenes(dmrs, dmrRanges, genes)
   dmrs <- wgbs.annotateCGIslands(dmrs, dmrRanges, cgis)
