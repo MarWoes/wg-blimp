@@ -57,10 +57,10 @@ annotation.annotateRepeats <- function (regions, regionRanges, repeats, classes)
 
 annotation.annotateRegions <- function (regionTable, gzippedCgiFile, gzippedGeneFile, gzippedRepeatMaskerAnnotationFile, gzippedTranscriptionStartSiteFile, allowedBiotypes, promoterTSSDistances) {
 
-  cgis <- fread(paste("zcat", gzippedCgiFile))
-  genes <- fread(paste("zcat", gzippedGeneFile))
-  transcriptStartSites <- fread(paste("zcat", gzippedTranscriptionStartSiteFile))
-  repeats <- fread(paste("zcat", gzippedRepeatMaskerAnnotationFile))
+  cgis <- fread(cmd = paste("zcat", gzippedCgiFile))
+  genes <- fread(cmd = paste("zcat", gzippedGeneFile))
+  transcriptStartSites <- fread(cmd = paste("zcat", gzippedTranscriptionStartSiteFile))
+  repeats <- fread(cmd = paste("zcat", gzippedRepeatMaskerAnnotationFile))
 
   cgis$chrom <- substr(cgis$chrom, 4, nchar(cgis$chrom))
   repeats$genoName <- substr(repeats$genoName, 4, nchar(repeats$genoName))
