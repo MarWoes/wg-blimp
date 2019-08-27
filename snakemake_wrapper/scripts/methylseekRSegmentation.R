@@ -90,20 +90,27 @@ loadOrInstall <- function(packageName) {
 #   save.image("methylseekr-debug.rds")
 # }
 fastaRef <- snakemake@input$ref
+cgiAnnotationFile <- snakemake@input$cgi_annotation_file
+geneAnnotationFile <- snakemake@input$gene_annotation_file
+repeatMaskerAnnotationFile <- snakemake@input$repeat_masker_annotation_file
+transcriptStartSiteFile <- snakemake@input$transcript_start_site_file
 samples <- snakemake@params$samples
 targetDir <- snakemake@params$target_dir
 methylationDir <- snakemake@params$methylation_dir
 calibrationChr <- snakemake@params$calibration_chr
 targetGenomeName <- snakemake@params$genome_build
+allowedBiotypes <- snakemake@params$biotypes
+tssDistances <- snakemake@params$tss_distances
 numThreads <- snakemake@threads
 targetPmdFile <- snakemake@output$pmd_all
 targetUmrLmrFile <- snakemake@output$umr_lmr_all
 
-### SCRIPT
-
 targetGenomeBS <- paste0("BSgenome.Hsapiens.UCSC.", targetGenomeName)
 
 loadOrInstall(targetGenomeBS)
+snakemake@source("regionAnnotation.R")
+
+### SCRIPT
 
 referenceBS <- get(targetGenomeBS)
 
@@ -207,5 +214,28 @@ umrLmrFiles <- list.files(targetDir, pattern = "umr-lmr.csv", recursive = TRUE, 
 pmdContents <- lapply(pmdFiles, fread)
 umrLmrContents <- lapply(umrLmrFiles, fread)
 
-fwrite(rbindlist(pmdContents), targetPmdFile)
-fwrite(rbindlist(umrLmrContents), targetUmrLmrFile)
+combinedPmdTable <- rbindlist(pmdContents)
+combinedUmrLmrTable <- rbindlist(umrLmrContents)
+
+annotatedPmdTable <- annotation.annotateRegions(
+  combinedPmdTable,
+  cgiAnnotationFile,
+  geneAnnotationFile,
+  repeatMaskerAnnotationFile,
+  transcriptStartSiteFile,
+  allowedBiotypes,
+  tssDistances
+)
+
+annotatedUmrLmrTable <- annotation.annotateRegions(
+  combinedUmrLmrTable,
+  cgiAnnotationFile,
+  geneAnnotationFile,
+  repeatMaskerAnnotationFile,
+  transcriptStartSiteFile,
+  allowedBiotypes,
+  tssDistances
+)
+
+fwrite(annotatedPmdTable, targetPmdFile)
+fwrite(annotatedUmrLmrTable, targetUmrLmrFile)

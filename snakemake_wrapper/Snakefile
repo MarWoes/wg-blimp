@@ -19,6 +19,10 @@ metilene_dir = dmr_dir + '/metilene'
 bsseq_dir = dmr_dir + '/bsseq'
 camel_dir = dmr_dir + '/camel'
 
+cgi_annotation_file = snakemake_dir + '/' + config['cgi_annotation_file']
+gene_annotation_file = snakemake_dir + '/' + config['gene_annotation_file']
+repeat_masker_annotation_file = snakemake_dir + '/' + config['repeat_masker_annotation_file']
+transcript_start_site_file = snakemake_dir + '/' + config['transcript_start_site_file']
 
 num_threads = config['computing_threads']
 io_threads = config['io_threads']
@@ -403,10 +407,10 @@ rule repeat_masker_download:
 
 rule dmr_annotation:
     input:
-        cgi_annotation_file = snakemake_dir + '/' + config['cgi_annotation_file'],
-        gene_annotation_file = snakemake_dir + '/' + config['gene_annotation_file'],
-        repeat_masker_annotation_file = snakemake_dir + '/' + config['repeat_masker_annotation_file'],
-        transcript_start_site_file = snakemake_dir + '/' + config['transcript_start_site_file'],
+        cgi_annotation_file = cgi_annotation_file,
+        gene_annotation_file = gene_annotation_file,
+        repeat_masker_annotation_file = repeat_masker_annotation_file,
+        transcript_start_site_file = transcript_start_site_file,
         coverages = expand(dmr_dir + '/dmr-coverage/{sample}.regions.bed.gz', sample = config['samples']),
         combined_dmrs = dmr_dir + '/combined-dmrs.csv'
     output:
@@ -426,7 +430,11 @@ rule dmr_annotation:
 rule methylseekr:
     input:
         ref = ref_fasta,
-        methylation_table = expand(methylation_dir + '/{sample}_CpG.bedGraph', sample = config['samples'])
+        methylation_table = expand(methylation_dir + '/{sample}_CpG.bedGraph', sample = config['samples']),
+        cgi_annotation_file = cgi_annotation_file,
+        gene_annotation_file = gene_annotation_file,
+        repeat_masker_annotation_file = repeat_masker_annotation_file,
+        transcript_start_site_file = transcript_start_site_file
     output:
         pmd_all = segmentation_dir + '/pmd-all.csv',
         umr_lmr_all = segmentation_dir + '/umr-lmr-all.csv',
@@ -438,7 +446,9 @@ rule methylseekr:
         samples = config['samples'],
         methylation_dir = methylation_dir,
         calibration_chr = config['methylseekr_pmd_chromosome'],
-        genome_build = config['methylseekr_cgi_genome']
+        genome_build = config['methylseekr_cgi_genome'],
+        biotypes = config['annotation_allowed_biotypes'],
+        tss_distances = config['promoter_tss_distances']
     threads:
         num_threads
     script:
