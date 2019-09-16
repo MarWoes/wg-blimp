@@ -449,6 +449,10 @@ rule methylseekr:
         genome_build = config['methylseekr_cgi_genome'],
         biotypes = config['annotation_allowed_biotypes'],
         tss_distances = config['promoter_tss_distances']
+    log:
+        log_dir + '/methylseekr.log'
+    benchmark:
+        benchmark_dir + '/methylseekr.tsv'
     threads:
         num_threads
     script:
