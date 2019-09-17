@@ -93,9 +93,9 @@ loadOrInstall <- function(packageName) {
 
 ### INPUT
 
-# if (exists("snakemake")) {
-#   save.image("methylseekr-debug.rds")
-# }
+#if (exists("snakemake")) {
+#  save.image("methylseekr-debug.rds")
+#}
 fastaRef <- snakemake@input$ref
 cgiAnnotationFile <- snakemake@input$cgi_annotation_file
 geneAnnotationFile <- snakemake@input$gene_annotation_file
@@ -150,6 +150,9 @@ for (sample in samples) {
   sampleRanges <- GRanges(methylationValues$chr, ranges = methylationValues$start)
   values(sampleRanges)$T <- methylationValues$methylated + methylationValues$unmethylated
   values(sampleRanges)$M <- methylationValues$methylated
+
+  # only keep ranges that match the reference genome
+  sampleRanges <- sampleRanges[as.logical(seqnames(sampleRanges) %in% seqnames(referenceBS))]
 
   png(paste0(targetDir, "/", sample, "/alphaCalibration.png"))
   pmdSegments <- segmentPMDs(
