@@ -38,6 +38,18 @@ shiny.wgbs.plotHistogram <- function(reactiveTableHandle, columnName, stat = "bi
 
 }
 
+shiny.wgbs.getPrecomputedSegmentationPlot <- function (input, selectedDataset, subPath) {
+
+  req(selectedDataset())
+  req(input$segmentationSampleSelect)
+
+  imagePath <- paste(shiny.wgbs.datasets[[selectedDataset()]]$segmentationDirectory, input$segmentationSampleSelect, subPath, sep = "/")
+
+  list(
+    src = imagePath
+  )
+}
+
 shinyServer(function(input, output, session) {
 
   selectedDataset <- reactiveVal()
@@ -227,6 +239,24 @@ shinyServer(function(input, output, session) {
     )
 
   })
+
+  observe({
+
+    req(selectedDataset())
+
+    availableSamples <- shiny.wgbs.datasets[[selectedDataset()]]$summary$sample
+
+    updateSelectInput(session, "segmentationSampleSelect", choices = availableSamples)
+
+  })
+
+  output$segmentationPosteriorAlphaImage <- renderImage({ shiny.wgbs.getPrecomputedSegmentationPlot(input, selectedDataset, "alphaCalibration.png") }, deleteFile = FALSE)
+  output$segmentationCpgMedianMethylationWithPMD <- renderImage({ shiny.wgbs.getPrecomputedSegmentationPlot(input, selectedDataset, "LMRUMRwithPMD/umr-lmr-heatmap.png") }, deleteFile = FALSE)
+  output$segmentationFdrStatsWithPMD <- renderImage({ shiny.wgbs.getPrecomputedSegmentationPlot(input, selectedDataset, "LMRUMRwithPMD/fdr.stats.png") }, deleteFile = FALSE)
+
+  output$segmentationPosteriorPMDRemovedAlphaImage <- renderImage({ shiny.wgbs.getPrecomputedSegmentationPlot(input, selectedDataset, "alphaPMDRemoved.png") }, deleteFile = FALSE)
+  output$segmentationCpgMedianMethylationWithoutPMD <- renderImage({ shiny.wgbs.getPrecomputedSegmentationPlot(input, selectedDataset, "LMRUMRwithoutPMD/umr-lmr-heatmap.png") }, deleteFile = FALSE)
+  output$segmentationFdrStatsWithoutPMD <- renderImage({ shiny.wgbs.getPrecomputedSegmentationPlot(input, selectedDataset, "LMRUMRwithoutPMD/fdr.stats.png") }, deleteFile = FALSE)
 
   output$numCpGHist <- renderPlot({ shiny.wgbs.plotHistogram(dmrTable, "num_cpgs") })
   output$diffHist <- renderPlot({ shiny.wgbs.plotHistogram(dmrTable, "diff") })

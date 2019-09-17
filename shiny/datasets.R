@@ -13,6 +13,7 @@ shiny.wgbs.loadDataset <- function (configFile) {
   multiqcReportSubPath <- "qc/multiqc_report.html"
   annotatedDmrSubPath <- "dmr/annotated-dmrs.csv"
   qualimapSubPath <- "qc/qualimap"
+  segmentationSubDir <- "segmentation/"
 
   multiqcColumnsOfInterest <- c(
     "Sample",
@@ -70,7 +71,8 @@ shiny.wgbs.loadDataset <- function (configFile) {
     config = snakemakeConfigContent,
     bamDirectory = paste(datasetRootPath, bamFileDirectory, sep = "/"),
     qualimapDirectory = paste(datasetRootPath, qualimapSubPath, sep = "/"),
-    fullReport = paste(datasetRootPath, multiqcReportSubPath, sep = "/")
+    fullReport = paste(datasetRootPath, multiqcReportSubPath, sep = "/"),
+    segmentationDirectory = paste(datasetRootPath, segmentationSubDir, sep = "/")
   ))
 }
 

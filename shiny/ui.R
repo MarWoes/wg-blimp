@@ -27,7 +27,8 @@ shinyUI(
         menuItem("Datasets",  tabName = "datasetTab", icon = icon("th-list")),
         menuItem("Statistics", tabName = "summaryTab", icon = icon("signal")),
         menuItem("Parameters", tabName = "parameterTab", icon = icon("cog")),
-        menuItem("DMRs", tabName = "dmrTab", icon = icon("dashboard"))
+        menuItem("DMRs", tabName = "dmrTab", icon = icon("dashboard")),
+        menuItem("Segmentation", tabName = "segmentationTab", icon = icon("barcode"))
       )
     ),
     dashboardBody(
@@ -142,6 +143,56 @@ shinyUI(
               title = "mean coverage (mapq >= 10)",
               width = 3,
               plotOutput("covHist")
+            )
+          )
+        ),
+        tabItem(tabName = "segmentationTab",
+          fluidRow(
+            box(
+              title = "Select sample",
+              width = 4,
+              selectInput("segmentationSampleSelect", "Show segmentation for sample:", choices = NULL, selectize = FALSE),
+              checkboxInput("segmentationWithPMD", "Include PMDs in computation", value = FALSE)
+            )
+          ),
+          conditionalPanel(
+            "input.segmentationWithPMD",
+            fluidRow(
+              box(
+                title = "Posterior mean of alpha",
+                width = 4,
+                imageOutput("segmentationPosteriorAlphaImage", height = "480px")
+              ),
+              box(
+                title = "UMR/LMR heatmap with PMD",
+                width = 4,
+                imageOutput("segmentationCpgMedianMethylationWithPMD", height = "480px")
+              ),
+              box(
+                title = "FDR stats with PMD",
+                width = 4,
+                imageOutput("segmentationFdrStatsWithPMD", height = "480px")
+              )
+            )
+          ),
+          conditionalPanel(
+            "!input.segmentationWithPMD",
+            fluidRow(
+              box(
+                title = "Posterior mean of alpha (PMDs removed)",
+                width = 4,
+                imageOutput("segmentationPosteriorPMDRemovedAlphaImage", height = "480px")
+              ),
+              box(
+                title = "UMR/LMR heatmap without PMDs",
+                width = 4,
+                imageOutput("segmentationCpgMedianMethylationWithoutPMD", height = "480px")
+              ),
+              box(
+                title = "FDR stats without PMDs",
+                width = 4,
+                imageOutput("segmentationFdrStatsWithoutPMD", height = "480px")
+              )
             )
           )
         )
