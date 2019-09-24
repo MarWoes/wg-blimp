@@ -250,6 +250,21 @@ shinyServer(function(input, output, session) {
 
   })
 
+  output$segmentationUmrLmrTable <- DT::renderDataTable({
+
+    req(selectedDataset())
+    req(input$segmentationSampleSelect)
+
+    subsetUmrLmrTable <- shiny.wgbs.datasets[[selectedDataset()]]$umrLmrAll[sample == input$segmentationSampleSelect & (pmd_included == input$segmentationWithPMD)]
+
+    return(DT::datatable(subsetUmrLmrTable,
+                         selection = "single",
+                         style = "bootstrap",
+                         class = DT:::DT2BSClass(c("compact", "hover", "stripe")),
+                         escape = FALSE
+    ) %>% formatRound(columns = c("mean_methylation", "median_methylation")))
+  })
+
   output$segmentationPosteriorAlphaImage <- renderImage({ shiny.wgbs.getPrecomputedSegmentationPlot(input, selectedDataset, "alphaCalibration.png") }, deleteFile = FALSE)
   output$segmentationCpgMedianMethylationWithPMD <- renderImage({ shiny.wgbs.getPrecomputedSegmentationPlot(input, selectedDataset, "LMRUMRwithPMD/umr-lmr-heatmap.png") }, deleteFile = FALSE)
   output$segmentationFdrStatsWithPMD <- renderImage({ shiny.wgbs.getPrecomputedSegmentationPlot(input, selectedDataset, "LMRUMRwithPMD/fdr.stats.png") }, deleteFile = FALSE)

@@ -14,6 +14,7 @@ shiny.wgbs.loadDataset <- function (configFile) {
   annotatedDmrSubPath <- "dmr/annotated-dmrs.csv"
   qualimapSubPath <- "qc/qualimap"
   segmentationSubDir <- "segmentation/"
+  umrLmrSubPath <- paste0(segmentationSubDir, "umr-lmr-all.csv")
 
   multiqcColumnsOfInterest <- c(
     "Sample",
@@ -51,6 +52,8 @@ shiny.wgbs.loadDataset <- function (configFile) {
 
   }
 
+  umrLmrAll <- fread(paste(datasetRootPath, umrLmrSubPath, sep = "/"))
+
   snakemakeConfig <- readLines(configFile)
 
   # WORKAROUND: there are issues with prism.js highlighting yaml syntax with the first
@@ -72,7 +75,8 @@ shiny.wgbs.loadDataset <- function (configFile) {
     bamDirectory = paste(datasetRootPath, bamFileDirectory, sep = "/"),
     qualimapDirectory = paste(datasetRootPath, qualimapSubPath, sep = "/"),
     fullReport = paste(datasetRootPath, multiqcReportSubPath, sep = "/"),
-    segmentationDirectory = paste(datasetRootPath, segmentationSubDir, sep = "/")
+    segmentationDirectory = paste(datasetRootPath, segmentationSubDir, sep = "/"),
+    umrLmrAll = umrLmrAll
   ))
 }
 

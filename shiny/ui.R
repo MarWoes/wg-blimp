@@ -164,12 +164,12 @@ shinyUI(
                 imageOutput("segmentationPosteriorAlphaImage", height = "480px")
               ),
               box(
-                title = "UMR/LMR heatmap with PMD",
+                title = "UMR/LMR heatmap with PMDs",
                 width = 4,
                 imageOutput("segmentationCpgMedianMethylationWithPMD", height = "480px")
               ),
               box(
-                title = "FDR stats with PMD",
+                title = "FDR stats with PMDs",
                 width = 4,
                 imageOutput("segmentationFdrStatsWithPMD", height = "480px")
               )
@@ -193,6 +193,13 @@ shinyUI(
                 width = 4,
                 imageOutput("segmentationFdrStatsWithoutPMD", height = "480px")
               )
+            )
+          ),
+          fluidRow(
+            box(
+              title = "UMRs/LMRs",
+              width = 12,
+              DT::dataTableOutput("segmentationUmrLmrTable")
             )
           )
         )
