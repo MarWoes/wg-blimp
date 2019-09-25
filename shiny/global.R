@@ -39,32 +39,6 @@ for (package in cranPackages) {
 
 }
 
-
-shiny.wgbs.annotatedDMRColumns <- c(
-  "chr",
-  "start",
-  "end",
-  "num_cpgs",
-  "diff",
-  "qValue",
-  "tool",
-  "length",
-  "gene_overlap",
-  "gene_name",
-  "cgi_overlap",
-  "promoter_overlap",
-  "promoter_name",
-  "num_repeats",
-  "mean_cov"
-)
-
-shiny.wgbs.annotatedDMRCharacterColumns <- c(
-  "chr",
-  "tool",
-  "gene_name",
-  "promoter_name"
-)
-
 source("datasets.R")
 source("multiqc.R")
 source("bamServing.R")

@@ -1,6 +1,15 @@
 library(data.table)
 library(yaml)
 
+shiny.wgbs.loadDataTable <- function (fileName) {
+
+  if(file.exists(fileName)) {
+    return(fread(fileName))
+  }
+
+  return(NULL)
+}
+
 shiny.wgbs.loadDataset <- function (configFile) {
 
   configYaml <- read_yaml(configFile)
@@ -35,26 +44,12 @@ shiny.wgbs.loadDataset <- function (configFile) {
   methylationMetrics <- fread(paste(datasetRootPath, methylationMetricsSubPath, sep = "/"))
 
   annotatedDmrPath <- paste(datasetRootPath, annotatedDmrSubPath, sep = "/")
+  umrLmrPath <- paste(datasetRootPath, umrLmrSubPath, sep = "/")
+  pmdPath <- paste(datasetRootPath, pmdSubPath, sep = "/")
 
-  if (file.exists(annotatedDmrPath)) {
-
-    annotatedDMRs <- fread(annotatedDmrPath)
-
-  } else {
-
-    annotatedDMRs <- data.table(matrix(ncol = length(shiny.wgbs.annotatedDMRColumns), nrow = 0))
-    colnames(annotatedDMRs) <- shiny.wgbs.annotatedDMRColumns
-
-    for (characterColumn in shiny.wgbs.annotatedDMRCharacterColumns) {
-
-      annotatedDMRs[[characterColumn]] <- character(0)
-
-    }
-
-  }
-
-  umrLmrAll <- fread(paste(datasetRootPath, umrLmrSubPath, sep = "/"))
-  pmdAll <- fread(paste(datasetRootPath, pmdSubPath, sep = "/"))
+  annotatedDmrs <- shiny.wgbs.loadDataTable(annotatedDmrPath)
+  umrLmrAll <- shiny.wgbs.loadDataTable(umrLmrPath)
+  pmdAll <- shiny.wgbs.loadDataTable(pmdPath)
 
   snakemakeConfig <- readLines(configFile)
 
@@ -72,7 +67,7 @@ shiny.wgbs.loadDataset <- function (configFile) {
 
   return(list(
     summary = combinedMetrics,
-    dmrs = annotatedDMRs,
+    dmrs = annotatedDmrs,
     config = snakemakeConfigContent,
     bamDirectory = paste(datasetRootPath, bamFileDirectory, sep = "/"),
     qualimapDirectory = paste(datasetRootPath, qualimapSubPath, sep = "/"),

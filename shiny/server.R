@@ -100,6 +100,8 @@ shinyServer(function(input, output, session) {
 
     selectedTable <- shiny.wgbs.datasets[[selectedDataset()]]$dmrs
 
+    req(selectedTable)
+
     genePattern <- paste0("\\b", input$geneFilter, "\\b", collapse = "|")
     toolPattern <- paste0("\\b", input$toolFilter, "\\b", collapse = "|")
 
@@ -207,6 +209,7 @@ shinyServer(function(input, output, session) {
   output$dmrTable <- DT::renderDataTable({
 
     req(selectedDataset())
+    req(dmrTable())
 
     dmrTableWithLinks <- dmrTable()
 
@@ -255,7 +258,11 @@ shinyServer(function(input, output, session) {
     req(selectedDataset())
     req(input$segmentationSampleSelect)
 
-    subsetUmrLmrTable <- shiny.wgbs.datasets[[selectedDataset()]]$umrLmrAll[sample == input$segmentationSampleSelect & (pmd_included == input$segmentationWithPMD)]
+    umrLmrTable <- shiny.wgbs.datasets[[selectedDataset()]]$umrLmrAll
+
+    req(umrLmrTable)
+
+    subsetUmrLmrTable <- umrLmrTable[sample == input$segmentationSampleSelect & (pmd_included == input$segmentationWithPMD)]
 
     return(DT::datatable(subsetUmrLmrTable,
                          selection = "single",
@@ -271,9 +278,13 @@ shinyServer(function(input, output, session) {
     req(input$segmentationSampleSelect)
     req(input$segmentationWithPMD)
 
-    subsetUmrLmrTable <- shiny.wgbs.datasets[[selectedDataset()]]$pmd[sample == input$segmentationSampleSelect]
+    allPmdTable <- shiny.wgbs.datasets[[selectedDataset()]]$pmd
 
-    return(DT::datatable(subsetUmrLmrTable,
+    req(allPmdTable)
+
+    subsetPmdTable <- allPmdTable[sample == input$segmentationSampleSelect]
+
+    return(DT::datatable(subsetPmdTable,
                          selection = "single",
                          style = "bootstrap",
                          class = DT:::DT2BSClass(c("compact", "hover", "stripe")),
