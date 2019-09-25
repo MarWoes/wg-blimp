@@ -15,6 +15,7 @@ shiny.wgbs.loadDataset <- function (configFile) {
   qualimapSubPath <- "qc/qualimap"
   segmentationSubDir <- "segmentation/"
   umrLmrSubPath <- paste0(segmentationSubDir, "umr-lmr-all.csv")
+  pmdSubPath <- paste0(segmentationSubDir, "pmd-all.csv")
 
   multiqcColumnsOfInterest <- c(
     "Sample",
@@ -53,6 +54,7 @@ shiny.wgbs.loadDataset <- function (configFile) {
   }
 
   umrLmrAll <- fread(paste(datasetRootPath, umrLmrSubPath, sep = "/"))
+  pmdAll <- fread(paste(datasetRootPath, pmdSubPath, sep = "/"))
 
   snakemakeConfig <- readLines(configFile)
 
@@ -76,7 +78,8 @@ shiny.wgbs.loadDataset <- function (configFile) {
     qualimapDirectory = paste(datasetRootPath, qualimapSubPath, sep = "/"),
     fullReport = paste(datasetRootPath, multiqcReportSubPath, sep = "/"),
     segmentationDirectory = paste(datasetRootPath, segmentationSubDir, sep = "/"),
-    umrLmrAll = umrLmrAll
+    umrLmrAll = umrLmrAll,
+    pmdAll = pmdAll
   ))
 }
 

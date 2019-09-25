@@ -173,6 +173,13 @@ shinyUI(
                 width = 4,
                 imageOutput("segmentationFdrStatsWithPMD", height = "480px")
               )
+            ),
+            fluidRow(
+              box(
+                title = "PMDs",
+                width = 12,
+                DT::dataTableOutput("segmentationPmdTable")
+              )
             )
           ),
           conditionalPanel(
