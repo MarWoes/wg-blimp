@@ -14,22 +14,7 @@ shinyUI(
   dashboardPage(
     dashboardHeader(title = "WGBS browser"),
     dashboardSidebar(
-      sidebarMenu(
-        fluidPage(
-          fluidRow(
-            column(width = 12, h4("Selected dataset:"))
-          ),
-          fluidRow(
-            column(width = 10, textOutput("selectedDataset"), offset = 2)
-          )
-        ),
-        hr(),
-        menuItem("Datasets",  tabName = "datasetTab", icon = icon("th-list")),
-        menuItem("Statistics", tabName = "summaryTab", icon = icon("signal")),
-        menuItem("Parameters", tabName = "parameterTab", icon = icon("cog")),
-        menuItem("DMRs", tabName = "dmrTab", icon = icon("dashboard")),
-        menuItem("Segmentation", tabName = "segmentationTab", icon = icon("barcode"))
-      )
+      sidebarMenuOutput("sidebarTabs")
     ),
     dashboardBody(
       prismDependencies,

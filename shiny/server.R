@@ -292,6 +292,45 @@ shinyServer(function(input, output, session) {
     ))
   })
 
+  output$sidebarTabs <- renderMenu({
+
+    sidebarMenuItems <- list(
+      fluidPage(
+        fluidRow(
+          column(width = 12, h4("Selected dataset:"))
+        ),
+        fluidRow(
+          column(width = 10, textOutput("selectedDataset"), offset = 2)
+        )
+      ),
+      hr(),
+      menuItem("Datasets",  tabName = "datasetTab", icon = icon("th-list"))
+    )
+
+    if (isTruthy(selectedDataset())) {
+
+      sidebarMenuItems <- append(sidebarMenuItems, list(
+        menuItem("Statistics", tabName = "summaryTab", icon = icon("signal")),
+        menuItem("Parameters", tabName = "parameterTab", icon = icon("cog"))
+      ))
+
+      if (!is.null(shiny.wgbs.datasets[[selectedDataset()]]$dmrs)) {
+        sidebarMenuItems <- append(sidebarMenuItems, list(
+          menuItem("DMRs", tabName = "dmrTab", icon = icon("dashboard"))
+        ))
+      }
+
+      if(!is.null(shiny.wgbs.datasets[[selectedDataset()]]$pmdAll)) {
+        sidebarMenuItems <- append(sidebarMenuItems, list(
+          menuItem("Segmentation", tabName = "segmentationTab", icon = icon("barcode"))
+        ))
+      }
+    }
+
+    sidebarMenu(.list = sidebarMenuItems)
+
+  })
+
   output$segmentationPosteriorAlphaImage <- renderImage({ shiny.wgbs.getPrecomputedSegmentationPlot(input, selectedDataset, "alphaCalibration.png") }, deleteFile = FALSE)
   output$segmentationCpgMedianMethylationWithPMD <- renderImage({ shiny.wgbs.getPrecomputedSegmentationPlot(input, selectedDataset, "LMRUMRwithPMD/umr-lmr-heatmap.png") }, deleteFile = FALSE)
   output$segmentationFdrStatsWithPMD <- renderImage({ shiny.wgbs.getPrecomputedSegmentationPlot(input, selectedDataset, "LMRUMRwithPMD/fdr.stats.png") }, deleteFile = FALSE)
