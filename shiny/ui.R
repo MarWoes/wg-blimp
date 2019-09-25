@@ -138,6 +138,19 @@ shinyUI(
               width = 4,
               selectInput("segmentationSampleSelect", "Show segmentation for sample:", choices = NULL, selectize = FALSE),
               checkboxInput("segmentationWithPMD", "Include PMDs in computation", value = FALSE)
+            ),
+            box(
+              title = "Download UMRs/LMRs",
+              width = 4,
+              downloadButton("segmentationUmrLmrDownload", "Download UMR/LMR table", icon = icon("download"))
+            ),
+            conditionalPanel(
+              condition = "input.segmentationWithPMD",
+              box(
+                title = "Download PMDs",
+                width = 4,
+                downloadButton("segmentationPmdDownload", "Download PMDs", icon = icon("download"))
+              )
             )
           ),
           conditionalPanel(

@@ -292,6 +292,28 @@ shinyServer(function(input, output, session) {
     ))
   })
 
+  output$segmentationUmrLmrDownload <- downloadHandler(
+    filename = function(...) paste0("umr-lmr-", input$segmentationSampleSelect, ".tsv"),
+    content = function (file) {
+
+      umrLmrTable <- shiny.wgbs.datasets[[selectedDataset()]]$umrLmrAll
+      subsetUmrLmrTable <- umrLmrTable[sample == input$segmentationSampleSelect & (pmd_included == input$segmentationWithPMD)]
+
+      write.table(subsetUmrLmrTable, file = file, quote = FALSE, sep = "\t", row.names = FALSE, col.names = TRUE)
+    }
+  )
+
+  output$segmentationPmdDownload <- downloadHandler(
+    filename = function(...) paste0("pmd-", input$segmentationSampleSelect, ".tsv"),
+    content = function (file) {
+
+      pmdTable <- shiny.wgbs.datasets[[selectedDataset()]]$pmdAll
+      subsetPmdTable <- pmdTable[sample == input$segmentationSampleSelect]
+
+      write.table(subsetPmdTable, file = file, quote = FALSE, sep = "\t", row.names = FALSE, col.names = TRUE)
+    }
+  )
+
   output$sidebarTabs <- renderMenu({
 
     sidebarMenuItems <- list(
