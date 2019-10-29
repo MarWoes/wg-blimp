@@ -20,6 +20,7 @@ dependencies:
   - pysam
   - h5py
   - r-data.table
+  - r-kernsmooth
   - r-upsetr
   - r-stringr
   - r-shiny
