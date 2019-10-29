@@ -157,9 +157,9 @@ shinyUI(
             "input.segmentationWithPMD",
             fluidRow(
               box(
-                title = "Posterior mean of alpha",
+                title = "Posterior mean of alpha (PMDs removed)",
                 width = 4,
-                imageOutput("segmentationPosteriorAlphaImage", height = "480px")
+                imageOutput("segmentationPosteriorPMDRemovedAlphaImage", height = "480px")
               ),
               box(
                 title = "UMR/LMR heatmap with PMDs",
@@ -184,9 +184,9 @@ shinyUI(
             "!input.segmentationWithPMD",
             fluidRow(
               box(
-                title = "Posterior mean of alpha (PMDs removed)",
+                title = "Posterior mean of alpha",
                 width = 4,
-                imageOutput("segmentationPosteriorPMDRemovedAlphaImage", height = "480px")
+                imageOutput("segmentationPosteriorAlphaImage", height = "480px")
               ),
               box(
                 title = "UMR/LMR heatmap without PMDs",
