@@ -17,6 +17,10 @@ callDmrs <- function (methylDackelBedGraphFiles, sampleNames, group1Samples, gro
   
   sampleNames(methylationData) <- sampleNames
 
+  # remove all NaN CpG loci: this should not happen in a WGBS experiment anyway, so the discarded
+  # regions should be considered low-quality
+  methylationData <- methylationData[!is.nan(rowSums(getMeth(methylationData, type = "raw")))]
+
   smoothedData <- BSmooth(methylationData, BPPARAM = biocParallelParam, verbose = TRUE)
 
   # add some color for later plotting
@@ -26,6 +30,7 @@ callDmrs <- function (methylDackelBedGraphFiles, sampleNames, group1Samples, gro
 
   # filter out rows containing NA's
   invalidRows <- is.na(rowSums(getMeth(smoothedData)))
+
   print(paste("Filtering out", sum(invalidRows), "rows containing NA"))
 
   tstats <- BSmooth.tstat(smoothedData[!invalidRows],
@@ -33,6 +38,7 @@ callDmrs <- function (methylDackelBedGraphFiles, sampleNames, group1Samples, gro
                           group2 = group2Samples,
                           estimate.var = "same",
                           mc.cores = threads)
+
   dmrs0 <- dmrFinder(tstats)
 
   write.table(dmrs0, file = csvFile, quote = FALSE, row.names = FALSE, col.names = TRUE, sep = "\t")
