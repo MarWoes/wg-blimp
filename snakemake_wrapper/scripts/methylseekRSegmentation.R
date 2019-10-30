@@ -14,6 +14,7 @@ library(parallel)
 
 ### GLOBALS
 
+MIN_COVERAGE <- 2
 FDR_CUTOFF <- 5
 METHYLATION_CUTOFF <- 0.5
 SEGMENTATION_WIDTH_PX <- 1366
@@ -28,7 +29,8 @@ segmentIntoUMRsAndLMRs <- function(sample, methylationRanges, cgiRanges, numThre
     m = methylationRanges,
     CGIs = cgiRanges,
     PMDs = pmdSegments,
-    num.cores = numThreads
+    num.cores = numThreads,
+    minCover = MIN_COVERAGE
   )
   dev.off()
 
@@ -43,7 +45,8 @@ segmentIntoUMRsAndLMRs <- function(sample, methylationRanges, cgiRanges, numThre
     PMDs = pmdSegments,
     num.cores = numThreads,
     myGenomeSeq = genomeSeq,
-    seqLengths = seqLengths
+    seqLengths = seqLengths,
+    minCover = MIN_COVERAGE
   )
   dev.off()
 
@@ -52,7 +55,8 @@ segmentIntoUMRsAndLMRs <- function(sample, methylationRanges, cgiRanges, numThre
     m = methylationRanges,
     segs = segments,
     PMDs = pmdSegments,
-    meth.cutoff = METHYLATION_CUTOFF
+    meth.cutoff = METHYLATION_CUTOFF,
+    minCover = MIN_COVERAGE
   )
   dev.off()
 
@@ -93,9 +97,9 @@ loadOrInstall <- function(packageName) {
 
 ### INPUT
 
-# if (exists("snakemake")) {
-#  save.image("methylseekr-debug.rds")
-# }
+if (exists("snakemake")) {
+ save.image("methylseekr-debug.rds")
+}
 fastaRef <- snakemake@input$ref
 cgiAnnotationFile <- snakemake@input$cgi_annotation_file
 geneAnnotationFile <- snakemake@input$gene_annotation_file
@@ -174,7 +178,8 @@ for (sample in samples) {
   png(paste0(targetDir, "/", sample, "/pmd.png"), width = SEGMENTATION_WIDTH_PX, height = SEGMENTATION_HEIGHT_PX, pointsize = SEGMENTATION_FONT_SIZE)
   plotPMDSegmentation(
     m = sampleRanges,
-    segs = pmdSegments
+    segs = pmdSegments,
+    minCover = MIN_COVERAGE
   )
   dev.off()
 
