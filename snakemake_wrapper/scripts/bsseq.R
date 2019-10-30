@@ -37,6 +37,7 @@ callDmrs <- function (methylDackelBedGraphFiles, sampleNames, group1Samples, gro
                           group1 = group1Samples,
                           group2 = group2Samples,
                           estimate.var = "same",
+                          local.correct = FALSE,
                           mc.cores = threads)
 
   dmrs0 <- dmrFinder(tstats)
@@ -67,6 +68,6 @@ if (exists("snakemake")) {
            snakemake@output$rdata,
            snakemake@output$csv,
            snakemake@output$pdf)
-  
+
 
 }
