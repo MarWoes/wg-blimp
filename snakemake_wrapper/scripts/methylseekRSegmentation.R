@@ -93,9 +93,9 @@ loadOrInstall <- function(packageName) {
 
 ### INPUT
 
-#if (exists("snakemake")) {
+# if (exists("snakemake")) {
 #  save.image("methylseekr-debug.rds")
-#}
+# }
 fastaRef <- snakemake@input$ref
 cgiAnnotationFile <- snakemake@input$cgi_annotation_file
 geneAnnotationFile <- snakemake@input$gene_annotation_file
@@ -181,10 +181,12 @@ for (sample in samples) {
   pmdSegmentTable <- data.table(
     sample = sample,
     chr = as.character(seqnames(pmdSegments)),
+    type = values(pmdSegments)$type,
     start = start(pmdSegments),
     end = end(pmdSegments),
     num_cpgs = values(pmdSegments)$nCG
   )
+  pmdSegmentTable <- pmdSegmentTable[type == "PMD"]
 
   if (!sequencesStartingWithChr) {
     pmdSegmentTable$chr <- str_remove(pmdSegmentTable$chr, "^chr")
