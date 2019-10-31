@@ -40,7 +40,7 @@ callDmrs <- function (methylDackelBedGraphFiles, sampleNames, group1Samples, gro
                           local.correct = FALSE,
                           mc.cores = threads)
 
-  dmrs0 <- dmrFinder(tstats)
+  dmrs0 <- dmrFinder(tstats, stat = "tstat")
 
   write.table(dmrs0, file = csvFile, quote = FALSE, row.names = FALSE, col.names = TRUE, sep = "\t")
 
