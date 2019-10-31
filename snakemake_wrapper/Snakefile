@@ -448,7 +448,10 @@ rule methylseekr:
         calibration_chr = config['methylseekr_pmd_chromosome'],
         genome_build = config['methylseekr_cgi_genome'],
         biotypes = config['annotation_allowed_biotypes'],
-        tss_distances = config['promoter_tss_distances']
+        tss_distances = config['promoter_tss_distances'],
+        min_coverage = config['min_cov'],
+        methylation_cutoff = config['methylseekr_methylation_cutoff'],
+        fdr_cutoff = config['methylseekr_fdr_cutoff']
     log:
         log_dir + '/methylseekr.log'
     benchmark:

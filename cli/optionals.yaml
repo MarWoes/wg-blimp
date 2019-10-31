@@ -46,5 +46,7 @@ repeat_masker_links: {
 }
 methylation_rate_on_chromosomes: []
 methylseekr_pmd_chromosome: '22'
+methylseekr_fdr_cutoff: 5
+methylseekr_methylation_cutoff: 0.5
 qualimap_memory_gb:
   32

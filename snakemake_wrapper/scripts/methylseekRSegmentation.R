@@ -14,15 +14,12 @@ library(parallel)
 
 ### GLOBALS
 
-MIN_COVERAGE <- 2
-FDR_CUTOFF <- 5
-METHYLATION_CUTOFF <- 0.5
 SEGMENTATION_WIDTH_PX <- 1366
 SEGMENTATION_HEIGHT_PX <- 768
 SEGMENTATION_FONT_SIZE <- 14
 
 ### FUNCTIONS
-segmentIntoUMRsAndLMRs <- function(sample, methylationRanges, cgiRanges, numThreads, targetDir, genomeSeq, seqLengths, pmdSegments, sequencesStartingWithChr) {
+segmentIntoUMRsAndLMRs <- function(sample, methylationRanges, cgiRanges, numThreads, targetDir, genomeSeq, seqLengths, pmdSegments, sequencesStartingWithChr, minCoverage, fdrCutoff, methylationCutoff) {
 
   png(paste0(targetDir, "/fdr.stats.png"))
   fdrStats <- calculateFDRs(
@@ -30,23 +27,23 @@ segmentIntoUMRsAndLMRs <- function(sample, methylationRanges, cgiRanges, numThre
     CGIs = cgiRanges,
     PMDs = pmdSegments,
     num.cores = numThreads,
-    minCover = MIN_COVERAGE
+    minCover = minCoverage
   )
   dev.off()
 
   # TODO: use other values than the default one?
-  selectedN <- as.integer(names(fdrStats$FDRs[as.character(METHYLATION_CUTOFF), ][fdrStats$FDRs[as.character(METHYLATION_CUTOFF), ] < FDR_CUTOFF])[1])
+  selectedN <- as.integer(names(fdrStats$FDRs[as.character(methylationCutoff), ][fdrStats$FDRs[as.character(methylationCutoff), ] < fdrCutoff])[1])
 
   png(paste0(targetDir, "/umr-lmr-heatmap.png"))
   segments <- segmentUMRsLMRs(
     m = methylationRanges,
-    meth.cutoff = METHYLATION_CUTOFF,
+    meth.cutoff = methylationCutoff,
     nCpG.cutoff = selectedN,
     PMDs = pmdSegments,
     num.cores = numThreads,
     myGenomeSeq = genomeSeq,
     seqLengths = seqLengths,
-    minCover = MIN_COVERAGE
+    minCover = minCoverage
   )
   dev.off()
 
@@ -55,8 +52,8 @@ segmentIntoUMRsAndLMRs <- function(sample, methylationRanges, cgiRanges, numThre
     m = methylationRanges,
     segs = segments,
     PMDs = pmdSegments,
-    meth.cutoff = METHYLATION_CUTOFF,
-    minCover = MIN_COVERAGE
+    meth.cutoff = methylationCutoff,
+    minCover = minCoverage
   )
   dev.off()
 
@@ -97,9 +94,9 @@ loadOrInstall <- function(packageName) {
 
 ### INPUT
 
-if (exists("snakemake")) {
- save.image("methylseekr-debug.rds")
-}
+# if (exists("snakemake")) {
+#  save.image("methylseekr-debug.rds")
+# }
 fastaRef <- snakemake@input$ref
 cgiAnnotationFile <- snakemake@input$cgi_annotation_file
 geneAnnotationFile <- snakemake@input$gene_annotation_file
@@ -115,6 +112,9 @@ tssDistances <- snakemake@params$tss_distances
 numThreads <- snakemake@threads
 targetPmdFile <- snakemake@output$pmd_all
 targetUmrLmrFile <- snakemake@output$umr_lmr_all
+minimumCoverage <- snakemake@params$min_coverage
+fdrCutoff <- snakemake@params$fdr_cutoff
+methylationCutoff <- snakemake@params$methylation_cutoff
 
 targetGenomeBS <- paste0("BSgenome.Hsapiens.UCSC.", targetGenomeName)
 
@@ -179,7 +179,7 @@ for (sample in samples) {
   plotPMDSegmentation(
     m = sampleRanges,
     segs = pmdSegments,
-    minCover = MIN_COVERAGE
+    minCover = minimumCoverage
   )
   dev.off()
 
@@ -208,7 +208,10 @@ for (sample in samples) {
     genomeSeq = referenceBS,
     seqLengths = seqlengths(referenceBS),
     pmdSegments = pmdSegments,
-    sequencesStartingWithChr
+    sequencesStartingWithChr = sequencesStartingWithChr,
+    minCoverage = minimumCoverage,
+    fdrCutoff = fdrCutoff,
+    methylationCutoff = methylationCutoff
   )
 
   segmentIntoUMRsAndLMRs(
@@ -220,7 +223,10 @@ for (sample in samples) {
     genomeSeq = referenceBS,
     seqLengths = seqlengths(referenceBS),
     pmdSegments = NA,
-    sequencesStartingWithChr
+    sequencesStartingWithChr = sequencesStartingWithChr,
+    minCoverage = minimumCoverage,
+    fdrCutoff = fdrCutoff,
+    methylationCutoff = methylationCutoff
   )
 
 }
