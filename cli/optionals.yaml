@@ -50,3 +50,5 @@ methylseekr_fdr_cutoff: 5
 methylseekr_methylation_cutoff: 0.5
 qualimap_memory_gb:
   32
+bsseq_local_correct:
+  FALSE

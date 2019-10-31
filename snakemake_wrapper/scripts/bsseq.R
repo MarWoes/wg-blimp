@@ -7,7 +7,7 @@ if (exists("snakemake")) {
 
 library(bsseq)
 
-callDmrs <- function (methylDackelBedGraphFiles, sampleNames, group1Samples, group2Samples, threads, min_cpg, min_diff, rdatFile, csvFile, pdfFile) {
+callDmrs <- function (methylDackelBedGraphFiles, sampleNames, group1Samples, group2Samples, threads, min_cpg, min_diff, localCorrect, rdatFile, csvFile, pdfFile) {
 
   biocParallelParam <- MulticoreParam(workers = threads)
   
@@ -37,10 +37,12 @@ callDmrs <- function (methylDackelBedGraphFiles, sampleNames, group1Samples, gro
                           group1 = group1Samples,
                           group2 = group2Samples,
                           estimate.var = "same",
-                          local.correct = FALSE,
+                          local.correct = localCorrect,
                           mc.cores = threads)
 
-  dmrs0 <- dmrFinder(tstats, stat = "tstat")
+  statType <- ifelse(localCorrect, "tstat.corrected", "tstat")
+
+  dmrs0 <- dmrFinder(tstats, stat = statType)
 
   write.table(dmrs0, file = csvFile, quote = FALSE, row.names = FALSE, col.names = TRUE, sep = "\t")
 
@@ -57,7 +59,7 @@ callDmrs <- function (methylDackelBedGraphFiles, sampleNames, group1Samples, gro
 
 if (exists("snakemake")) {
 
-  #save.image(file = "snakemake.Rdata")
+  # save.image(file = "snakemake.Rdata")
   callDmrs(snakemake@input$meth,
            snakemake@config$samples,
            snakemake@config$group1,
@@ -65,6 +67,7 @@ if (exists("snakemake")) {
            snakemake@threads,
            snakemake@config$min_cpg,
            snakemake@config$min_diff,
+           snakemake@params$local_correct,
            snakemake@output$rdata,
            snakemake@output$csv,
            snakemake@output$pdf)

@@ -355,6 +355,8 @@ rule bsseq:
         pdf   = bsseq_dir + '/top100.pdf'
     threads:
         config['io_threads']
+    params:
+        local_correct = config['bsseq_local_correct']
     log:
         log_dir + '/bsseq.log'
     benchmark:
