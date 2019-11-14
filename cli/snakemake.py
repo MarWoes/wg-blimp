@@ -28,7 +28,7 @@ def run_snakemake(dry_run, use_sample_files, cores, genome_build, fastq_dir, ref
 
     cli.config.create_config(use_sample_files, genome_build, cores, fastq_dir, reference_fasta, group1, group2, output_dir, yaml_config_file)
 
-    run_snakemake_from_config(dry_run, yaml_config_file, cores=1)
+    run_snakemake_from_config(dry_run, yaml_config_file, cores=cores)
 
 
 def delete_all_output(dry_run, config_yaml):
