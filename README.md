@@ -2,7 +2,7 @@
     <img height="150" src="https://uni-muenster.sciebo.de/s/HMY3W1CW6GAwm85/download">
 </p>
 
-`wg-blimp` (Whole Genome BisuLfIte sequencing Methylation analysis Pipeline) can be utilised to analyse WGBS data. It performs alignment, qc, methylation calling, DMR calling and DMR annotation using a multitude of tools. First time using `wg-blimp`? We recommend having a look at our [step-by-step guide](https://github.com/MarWoes/wg-blimp/wiki/Tutorial).
+`wg-blimp` (Whole Genome BisuLfIte sequencing Methylation analysis Pipeline) can be utilised to analyse WGBS data. It performs alignment, qc, methylation calling, DMR calling, segmentation and annotation using a multitude of tools. First time using `wg-blimp`? We recommend having a look at our [step-by-step guide](https://github.com/MarWoes/wg-blimp/wiki/Tutorial).
 
 ## Requirements
 To run `wg-blimp` you need a UNIX environment that contains a [Bioconda](http://bioconda.github.io/) setup.
@@ -56,6 +56,7 @@ The folder structure created by `wg-blimp run-snakemake` will look as follows:
 * methylation - methylation bedgraph files
 * qc - multiqc and other qc related files
 * raw - text files describing which fastq files have been used for each sample
+* segmentation - methylome segments (UMRs/LMRs/PMDs) as computed by MethylSeekR
 * config.yaml - configuration file used for the analysis
 
 It is recommended to check the *raw* folder if all samples contain the correct raw fastq source files.
@@ -66,7 +67,7 @@ You can use the command `wg-blimp run-shiny` to load one or more project config 
 
 ## Example
 
-Some example `.fastq`can be found on [Sciebo](https://uni-muenster.sciebo.de/s/8Z5uBWhlkunXfbY). You can use the command
+Some example `.fastq`can be found on [Sciebo](https://uni-muenster.sciebo.de/s/7vpqRSEATYcvlnP). You can use the command
 ```
 wg-blimp run-snakemake <folder-with-fastqs> <reference.fa> simulated1,simulated2 simulated3,simulated4 <output-folder>
 ```
@@ -82,6 +83,7 @@ The following entries are used for running the Snakemake pipeline and may be spe
 | --- | ----- |
 | *annotation_allowed_biotypes* | Only genes with this biotype will be annotated in the DMR table |
 | *annotation_min_mapq* | When annotating coverage, only use reads with a minimum mapping quality |
+| *bsseq_local_correct* | Use local correction for bsseq DMR calling. Usually, setting this to FALSE will increase the number of calls. |
 | *cgi_annotation_file* | Gzipped csv file used for cg island annotation. |
 | *computing_threads* | Number of processors a single job is allowed to use. Remember to use `--cores` parameter for Snakemake. |
 | *dmr_tools* | Tools to use for DMR calling. Available: `bsseq`, `camel`, `metilene`
@@ -90,13 +92,18 @@ The following entries are used for running the Snakemake pipeline and may be spe
 | *group2* | Samples in second group for DMR analysis |
 | *io_threads* | IO intensive tools virtually reserve this many cores (while actually using only one) to reduce file system IO load. |
 | *methylation_rate_on_chromosomes* | Compute methylation rates for these chromosome during qc |
+| *methylseekr_cgi_genome* | Reference genome to use for MethylSeekR CGI queries. |
+| *methylseekr_fdr_cutoff* | FDR cutoff for MethylSeekR segmentation. |
+| *methylseekr_methylation_cutoff* | Methylation cutoff for MethylSeekR segmentation. |
+| *methylseekr_pmd_chromosome* | Chromosome to compute MethylSeekR alpha values for. |
 | *min_cov* | Minimum average coverage for methylation calling |
 | *min_cpg* | Minimum number of CpGs in a DMR to be called |
 | *min_diff* | Minimum average difference between the two groups for DMR calling |
 | *output_dir* | Directory containing all files created by the pipeline |
 | *promoter_tss_distances* | Distance interval around TSS's to be recognized as promoters in DMR annotation. |
-| *rawsuffixregex* | The regular expressions to match for paired reads. By default, Illumina naming conventions are accepted. |
+| *qualimap_memory_gb* | Gigabytes of RAM to allocate for Qualimap. If samples are too large, this must be increased to prevent crashes. |
 | *rawdir* | Directory containing .fastq files |
+| *rawsuffixregex* | The regular expressions to match for paired reads. By default, Illumina naming conventions are accepted. |
 | *ref* | .fasta reference file |
 | *repeat_masker_annotation_file* | File containing repeat masker annotation |
 | *repeat_masker_links* | Repeat masker files are relatively big and are only downloaded on demand from the links specified here. |
