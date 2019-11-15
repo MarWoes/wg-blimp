@@ -1,32 +1,23 @@
-name: wg-blimp-dev
+name: wg-blimp-testing
 channels:
   - conda-forge
   - bioconda
 dependencies:
-  - bwameth=0.2.0
-  - mosdepth
-  - picard
-  - samtools
-  - bwa
-  - snakemake
-  - fastqc
-  - multiqc
-  - methyldackel
-  - qualimap
-  - metilene
   - bedtools
-  - bioconductor-bsseq
-  - bioconductor-methylseekr
-  - pysam
+  - bwa
+  - bwameth=0.2.0
+  - fastqc
+  - git
   - h5py
-  - r-data.table
-  - r-kernsmooth
-  - r-upsetr
-  - r-stringr
-  - r-shiny
-  - r-shinydashboard
-  - r-ggplot2
-  - r-htmlwidgets
-  - r-dt
-  - r-httpuv
-  - r-yaml
+  - methyldackel
+  - metilene
+  - mosdepth
+  - multiqc
+  - picard
+  - python >=3.5
+  - pysam
+  - qualimap
+  - r-base
+  - ruamel.yaml
+  - samtools
+  - snakemake
