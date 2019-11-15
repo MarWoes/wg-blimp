@@ -5,7 +5,7 @@ channels:
 dependencies:
   - bedtools
   - bwa
-  - bwameth=0.2.0
+  - bwameth 0.2.0
   - fastqc
   - git
   - h5py
@@ -14,7 +14,6 @@ dependencies:
   - mosdepth
   - multiqc
   - picard
-  - python >=3.5
   - pysam
   - qualimap
   - r-base

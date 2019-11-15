@@ -41,6 +41,18 @@ rule all:
         mbias_ob_reports +
         mbias_ot_reports
 
+
+### R package installation
+
+rule install_r_packages:
+    output:
+        r_session_info = log_dir + '/r_session_info.log'
+    log:
+        log_dir + '/r_install.log'
+    script:
+        'scripts/packageManagement.R'
+
+
 ### ALIGNMENT
 
 rule find_fqs:
@@ -229,7 +241,8 @@ rule multiqc:
 
 rule methylation_metrics:
     input:
-        bed_graphs = expand(methylation_dir + '/{sample}_CpG.bedGraph', sample = config['samples'])
+        bed_graphs = expand(methylation_dir + '/{sample}_CpG.bedGraph', sample = config['samples']),
+        r_installation = rules.install_r_packages.output
     output:
         methylation_metrics = qc_dir + '/methylation_metrics.csv'
     log:
@@ -260,7 +273,8 @@ rule methyl_dackel:
 
 rule bedgraph_to_methylation_ratio:
     input:
-        bedGraph = methylation_dir + '/{sample}_CpG.bedGraph'
+        bedGraph = methylation_dir + '/{sample}_CpG.bedGraph',
+        r_installation = rules.install_r_packages.output
     output:
         bedGraph = temp(methylation_dir + '/{sample}_CpG_ratio.bedGraph')
     log:
@@ -348,7 +362,8 @@ rule camel_dmr:
 
 rule bsseq:
     input:
-        meth = expand(methylation_dir + '/{sample}_CpG.bedGraph', sample = config['samples'])
+        meth = expand(methylation_dir + '/{sample}_CpG.bedGraph', sample = config['samples']),
+        r_installation = rules.install_r_packages.output
     output:
         rdata = bsseq_dir + '/bsseq.Rdata',
         csv   = bsseq_dir + '/dmrs.csv',
@@ -371,7 +386,8 @@ def expected_tool_files():
 
 rule dmr_combination:
     input:
-        **expected_tool_files()
+        **expected_tool_files(),
+        r_installation = rules.install_r_packages.output
     output:
         csv = dmr_dir + '/combined-dmrs.csv',
         bed = dmr_dir + '/dmr-coverage/combined-dmrs.bed'
@@ -414,7 +430,8 @@ rule dmr_annotation:
         repeat_masker_annotation_file = repeat_masker_annotation_file,
         transcript_start_site_file = transcript_start_site_file,
         coverages = expand(dmr_dir + '/dmr-coverage/{sample}.regions.bed.gz', sample = config['samples']),
-        combined_dmrs = dmr_dir + '/combined-dmrs.csv'
+        combined_dmrs = dmr_dir + '/combined-dmrs.csv',
+        r_installation = rules.install_r_packages.output
     output:
         annotated_dmrs = dmr_dir + '/annotated-dmrs.csv'
     params:
@@ -436,7 +453,8 @@ rule methylseekr:
         cgi_annotation_file = cgi_annotation_file,
         gene_annotation_file = gene_annotation_file,
         repeat_masker_annotation_file = repeat_masker_annotation_file,
-        transcript_start_site_file = transcript_start_site_file
+        transcript_start_site_file = transcript_start_site_file,
+        r_installation = rules.install_r_packages.output
     output:
         pmd_all = segmentation_dir + '/pmd-all.csv',
         umr_lmr_all = segmentation_dir + '/umr-lmr-all.csv',
@@ -467,10 +485,13 @@ rule methylseekr:
 
 rule benchmark_plot:
     input:
-        target_files = target_files
+        target_files = target_files,
+        r_installation = rules.install_r_packages.output
     output:
         runtime_report = runtime_report
     params:
         benchmark_dir = benchmark_dir
+    log:
+        log_dir + '/benchmark.log'
     script:
         'scripts/benchmarkPlot.R'

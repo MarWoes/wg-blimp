@@ -13,9 +13,8 @@ To run `wg-blimp` you need a UNIX environment that contains a [Bioconda](http://
 It is advised to install `wg-blimp` through Bioconda. It is also recommended to install `wg-blimp` in a fresh environment, as it has many dependencies that may conflict with other packages, for this you can use:
 
 ```
-conda create -n wg-blimp wg-blimp python=3.6
+conda create -n wg-blimp wg-blimp
 ```
-The requirement `python=3.6` is currently necessary because of otherwise slow conda dependency solving.
 
 ### From source
 You can also install `wg-blimp` from source using
