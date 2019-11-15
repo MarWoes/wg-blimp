@@ -11,7 +11,7 @@ def run_snakemake_from_config(dry_run, config_yaml, delete_all_output=False, cor
 
     snakemake.snakemake(
         snakefile=snakefile_location,
-        configfile=config_yaml,
+        configfiles=[config_yaml],
         dryrun=dry_run,
         cores=cores,
         printshellcmds=True,
