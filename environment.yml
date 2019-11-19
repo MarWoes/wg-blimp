@@ -6,6 +6,7 @@ dependencies:
   - bedtools
   - bwa
   - bwameth 0.2.0
+  - click
   - fastqc
   - git
   - h5py
@@ -19,4 +20,4 @@ dependencies:
   - r-base
   - ruamel.yaml
   - samtools
-  - snakemake
+  - snakemake-minimal >=5.8
