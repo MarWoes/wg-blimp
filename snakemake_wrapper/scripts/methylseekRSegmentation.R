@@ -186,9 +186,9 @@ for (sample in samples) {
   pmdSegmentTable <- data.table(
     sample = sample,
     chr = as.character(seqnames(pmdSegments)),
-    type = values(pmdSegments)$type,
     start = start(pmdSegments),
     end = end(pmdSegments),
+    type = values(pmdSegments)$type,
     num_cpgs = values(pmdSegments)$nCG
   )
   pmdSegmentTable <- pmdSegmentTable[type == "PMD"]
