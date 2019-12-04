@@ -137,7 +137,7 @@ shinyUI(
               title = "Select sample",
               width = 4,
               selectInput("segmentationSampleSelect", "Show segmentation for sample:", choices = NULL, selectize = FALSE),
-              checkboxInput("segmentationWithPMD", "Include PMDs in computation", value = FALSE)
+              checkboxInput("segmentationWithPMD", "Mask PMDs", value = FALSE)
             ),
             box(
               title = "Download UMRs/LMRs",
@@ -157,17 +157,17 @@ shinyUI(
             "input.segmentationWithPMD",
             fluidRow(
               box(
-                title = "Posterior mean of alpha (PMDs removed)",
+                title = "Posterior mean of alpha (PMDs masked)",
                 width = 4,
                 imageOutput("segmentationPosteriorPMDRemovedAlphaImage", height = "480px")
               ),
               box(
-                title = "UMR/LMR heatmap with PMDs",
+                title = "UMR/LMR heatmap (PMDs masked)",
                 width = 4,
                 imageOutput("segmentationCpgMedianMethylationWithPMD", height = "480px")
               ),
               box(
-                title = "FDR stats with PMDs",
+                title = "FDR stats (PMDs masked)",
                 width = 4,
                 imageOutput("segmentationFdrStatsWithPMD", height = "480px")
               )
@@ -189,12 +189,12 @@ shinyUI(
                 imageOutput("segmentationPosteriorAlphaImage", height = "480px")
               ),
               box(
-                title = "UMR/LMR heatmap without PMDs",
+                title = "UMR/LMR heatmap",
                 width = 4,
                 imageOutput("segmentationCpgMedianMethylationWithoutPMD", height = "480px")
               ),
               box(
-                title = "FDR stats without PMDs",
+                title = "FDR stats",
                 width = 4,
                 imageOutput("segmentationFdrStatsWithoutPMD", height = "480px")
               )
