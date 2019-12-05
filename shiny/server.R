@@ -262,7 +262,7 @@ shinyServer(function(input, output, session) {
 
     req(umrLmrTable)
 
-    subsetUmrLmrTable <- umrLmrTable[sample == input$segmentationSampleSelect & (pmd_included == input$segmentationWithPMD)]
+    subsetUmrLmrTable <- umrLmrTable[sample == input$segmentationSampleSelect & (pmds_masked == input$segmentationWithPMD)]
 
     return(DT::datatable(subsetUmrLmrTable,
                          selection = "single",
@@ -297,7 +297,7 @@ shinyServer(function(input, output, session) {
     content = function (file) {
 
       umrLmrTable <- shiny.wgbs.datasets[[selectedDataset()]]$umrLmrAll
-      subsetUmrLmrTable <- umrLmrTable[sample == input$segmentationSampleSelect & (pmd_included == input$segmentationWithPMD)]
+      subsetUmrLmrTable <- umrLmrTable[sample == input$segmentationSampleSelect & (pmds_masked == input$segmentationWithPMD)]
 
       write.table(subsetUmrLmrTable, file = file, quote = FALSE, sep = "\t", row.names = FALSE, col.names = TRUE)
     }
