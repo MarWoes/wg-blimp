@@ -4,32 +4,24 @@
 # see https://github.com/rstudio/shiny/pull/747/files
 # also, shiny does not support symlinking, so we manually add that as well.
 # see https://github.com/rstudio/shiny/issues/1064
-util.strEndsWith <- function (string, end) {
-  return(substr(string, nchar(string) - nchar(end) + 1, nchar(string)) == end)
-}
+hackedStaticHandling <- function(routeMap) {
 
-
-hackedStaticHandling <- function(root) {
-  force(root)
   return(function(req) {
     if (!identical(req$REQUEST_METHOD, 'GET'))
       return(NULL)
 
-    path <- req$PATH_INFO
+    if (!req$PATH_INFO %in% names(routeMap))
+      return(NULL)
 
-    if (is.null(path))
-      return(shiny:::httpResponse(400, content="<h1>Bad Request</h1>"))
-
-    if (path == '/')
-      path <- '/index.html'
+    path <- routeMap[[req$PATH_INFO]]
 
     # shiny doesn't correctly handle symlinks, so we fix those on our own....
-    symlinkPath <- Sys.readlink(file.path(root, path))
+    symlinkPath <- Sys.readlink(path)
 
     if (file.exists(symlinkPath)) {
       abs.path <- symlinkPath
     } else {
-      abs.path <- shiny:::resolve(root, path)
+      abs.path <- path
     }
 
     if (is.null(abs.path))
@@ -66,19 +58,20 @@ hackedStaticHandling <- function(root) {
   })
 }
 
-assignInNamespace("staticHandler", hackedStaticHandling, "shiny")
-## HACK HACK HACK HACK HACK
-
+## END HACK HACK HACK HACK HACK
 
 shiny.wgbs.serveBamFiles <- function (datasets) {
 
+  servedFilesSubPath <- lapply(datasets, function (dataset) list.files(dataset[["bamDirectory"]], pattern = "bai$|bam$"))
+  servedFilesFullPath <- lapply(datasets, function (dataset) list.files(dataset[["bamDirectory"]], pattern = "bai$|bam$", full.names = TRUE))
 
-  for (datasetName in names(datasets)) {
+  datasetLengths <- sapply(names(servedFilesSubPath), function (datasetName) length(servedFilesSubPath[[datasetName]]))
 
-    alignmentDir <- datasets[[datasetName]]$bamDirectory
+  routeKeys <- paste0("/", rep(names(servedFilesSubPath), datasetLengths), "/", unlist(servedFilesSubPath))
 
-    addResourcePath(datasetName, alignmentDir)
+  routeMap <- setNames(unlist(servedFilesFullPath), routeKeys)
 
-  }
+  shiny:::handlerManager$addHandler(hackedStaticHandling(routeMap), key = "alignments")
+
 }
 
