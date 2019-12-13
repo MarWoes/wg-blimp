@@ -52,3 +52,4 @@ qualimap_memory_gb:
   32
 bsseq_local_correct:
   FALSE
+sample_fastq_csv:

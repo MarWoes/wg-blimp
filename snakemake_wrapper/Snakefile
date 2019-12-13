@@ -64,11 +64,12 @@ rule find_fqs:
     params:
         rawdir = config['rawdir'],
         samples = config['samples'],
-        output_dir = output_dir,
         first_regex = config['rawsuffixregex']['first'],
-        second_regex = config['rawsuffixregex']['second']
+        second_regex = config['rawsuffixregex']['second'],
+        sample_fastq_csv = config['sample_fastq_csv']
     log:
         log_dir + '/find_fqs/{sample}.log'
+    priority: 10
     script:
         'scripts/findFastqs.R'
 
