@@ -56,18 +56,21 @@ rule install_r_packages:
 ### ALIGNMENT
 
 rule find_fqs:
+    input:
+        r_installation = rules.install_r_packages.output
     output:
         first  = output_dir +'/raw/{sample}.first.txt',
         second = output_dir +'/raw/{sample}.second.txt'
     params:
         rawdir = config['rawdir'],
+        samples = config['samples'],
+        output_dir = output_dir,
         first_regex = config['rawsuffixregex']['first'],
         second_regex = config['rawsuffixregex']['second']
-    shell:
-        """
-        find {params.rawdir} | grep -E '.*{wildcards.sample}.*{params.first_regex}'  | sort > {output.first}
-        find {params.rawdir} | grep -E '.*{wildcards.sample}.*{params.second_regex}' | sort > {output.second}
-        """
+    log:
+        log_dir + '/find_fqs/{sample}.log'
+    script:
+        'scripts/findFastqs.R'
 
 rule bwameth_indexing:
     input:
