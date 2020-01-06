@@ -1,5 +1,5 @@
 <p align="center">
-    <img height="150" src="https://uni-muenster.sciebo.de/s/HMY3W1CW6GAwm85/download">
+    <img height="150" src="https://uni-muenster.sciebo.de/s/I0dmJFFdq4UUYmk/download">
 </p>
 
 `wg-blimp` (Whole Genome BisuLfIte sequencing Methylation analysis Pipeline) can be utilised to analyse WGBS data. It performs alignment, qc, methylation calling, DMR calling, segmentation and annotation using a multitude of tools. First time using `wg-blimp`? We recommend having a look at our [step-by-step guide](https://github.com/MarWoes/wg-blimp/wiki/Tutorial).
