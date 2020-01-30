@@ -9,11 +9,23 @@ To run `wg-blimp` you need a UNIX environment that contains a [Bioconda](http://
 
 ## Installation
 
-### Recommended
+### Bioconda
 It is advised to install `wg-blimp` through Bioconda. It is also recommended to install `wg-blimp` in a fresh environment, as it has many dependencies that may conflict with other packages, for this you can use:
 
 ```
-conda create -n wg-blimp wg-blimp python=3.6.7 r-base=3.6.1
+conda create -n wg-blimp wg-blimp python=3.6.7 r-base=3.6.2
+```
+
+### Docker
+
+We bundled a full `wg-blimp` installation into a Docker container. You may pull our image using
+```
+docker pull imimarw/wg-blimp:v0.9.5
+```
+
+Once the image was downloaded and extracted, you can start the docker container with
+```
+docker run -it -v <directory-to-be-mounted>:<mounted-directory-in-container> imimarw/wg-blimp:v0.9.5
 ```
 
 ### From source
@@ -27,7 +39,7 @@ Using this installation method requires you to make sure all external tools are 
 
 ### WGBS pipeline
 
-`wg-blimp` is a cli wrapper for the WGBS pipeline implemented using [Snakemake](http://snakemake.readthedocs.io/). In general, a pipeline config us fed to the Snakemake workflow and the corresponding tools are called. However, `wg-blimp` also provides some commands to ease creation of config files, or working without config files altogether.
+`wg-blimp` is a cli wrapper for the WGBS pipeline implemented using [Snakemake](http://snakemake.readthedocs.io/). In general, a pipeline config is fed to the Snakemake workflow and the corresponding tools are called. However, `wg-blimp` also provides some commands to ease creation of config files, or working without config files altogether.
 
 The command `wg-blimp run-snakemake` will run the pipeline with its default parameters. Make sure to set the `--cores` and `--genome-build` options appropriately. This command will also internally create a `config.yaml` file containing all parameters used for the analysis.
 
@@ -75,9 +87,9 @@ You can use the command `wg-blimp run-shiny` to load one or more project config 
 
 ## Example
 
-Some example `.fastq`can be found on [Sciebo](https://uni-muenster.sciebo.de/s/7vpqRSEATYcvlnP). You can use the command
+Some example `.fastq` can be found on [Sciebo](https://uni-muenster.sciebo.de/s/7vpqRSEATYcvlnP). You can use the command
 ```
-wg-blimp run-snakemake <folder-with-fastqs> <reference.fa> simulated1,simulated2 simulated3,simulated4 <output-folder>
+wg-blimp run-snakemake fastq/ chr22.fasta blood1,blood2 sperm1,sperm2 results --cores=8
 ```
 
 Please not that the pipeline commands also allow a `--use-sample-files` option so sample groups can be loaded from text files instead of comma separates files.
