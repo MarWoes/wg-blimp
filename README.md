@@ -134,3 +134,7 @@ The following entries are used for running the Snakemake pipeline and may be spe
 
 ## Reporting errors / Requesting features
 If anything goes wrong using `wg-blimp` or any features are missing, feel free to open an issue or to contact Marius Wöste ( mar.w@wwu.de )
+
+## Citing
+Please make sure to cite the [BMC software article](https://doi.org/10.1186/s12859-020-3470-5) when using wg-blimp for research purposes:
+> Wöste, M., Leitão, E., Laurentino, S. et al. wg-blimp: an end-to-end analysis pipeline for whole genome bisulfite sequencing data. BMC Bioinformatics 21, 169 (2020). https://doi.org/10.1186/s12859-020-3470-5
