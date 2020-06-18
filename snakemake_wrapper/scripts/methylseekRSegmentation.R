@@ -97,11 +97,12 @@ loadOrInstall <- function(packageName) {
 # if (exists("snakemake")) {
 #  save.image("methylseekr-debug.rds")
 # }
+
 fastaRef <- snakemake@input$ref
-cgiAnnotationFile <- snakemake@input$cgi_annotation_file
-geneAnnotationFile <- snakemake@input$gene_annotation_file
-repeatMaskerAnnotationFile <- snakemake@input$repeat_masker_annotation_file
-transcriptStartSiteFile <- snakemake@input$transcript_start_site_file
+cgiAnnotationFile <- snakemake@params$cgi_annotation_file
+geneAnnotationFile <- snakemake@params$gene_annotation_file
+repeatMaskerAnnotationFile <- snakemake@params$repeat_masker_annotation_file
+transcriptStartSiteFile <- snakemake@params$transcript_start_site_file
 samples <- snakemake@params$samples
 targetDir <- snakemake@params$target_dir
 methylationDir <- snakemake@params$methylation_dir

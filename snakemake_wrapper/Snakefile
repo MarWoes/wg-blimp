@@ -429,10 +429,6 @@ rule repeat_masker_download:
 
 rule dmr_annotation:
     input:
-        cgi_annotation_file = cgi_annotation_file,
-        gene_annotation_file = gene_annotation_file,
-        repeat_masker_annotation_file = repeat_masker_annotation_file,
-        transcript_start_site_file = transcript_start_site_file,
         coverages = expand(dmr_dir + '/dmr-coverage/{sample}.regions.bed.gz', sample = config['samples']),
         combined_dmrs = dmr_dir + '/combined-dmrs.csv',
         r_installation = rules.install_r_packages.output
@@ -440,7 +436,11 @@ rule dmr_annotation:
         annotated_dmrs = dmr_dir + '/annotated-dmrs.csv'
     params:
         biotypes = config['annotation_allowed_biotypes'],
-        tss_distances = config['promoter_tss_distances']
+        tss_distances = config['promoter_tss_distances'],
+        cgi_annotation_file = cgi_annotation_file,
+        gene_annotation_file = gene_annotation_file,
+        repeat_masker_annotation_file = repeat_masker_annotation_file,
+        transcript_start_site_file = transcript_start_site_file
     log:
         log_dir + '/dmr_annotation.log'
     benchmark:
@@ -454,10 +454,6 @@ rule methylseekr:
     input:
         ref = ref_fasta,
         methylation_table = expand(methylation_dir + '/{sample}_CpG.bedGraph', sample = config['samples']),
-        cgi_annotation_file = cgi_annotation_file,
-        gene_annotation_file = gene_annotation_file,
-        repeat_masker_annotation_file = repeat_masker_annotation_file,
-        transcript_start_site_file = transcript_start_site_file,
         r_installation = rules.install_r_packages.output
     output:
         pmd_all = segmentation_dir + '/pmd-all.csv',
@@ -475,7 +471,11 @@ rule methylseekr:
         tss_distances = config['promoter_tss_distances'],
         min_coverage = config['min_cov'],
         methylation_cutoff = config['methylseekr_methylation_cutoff'],
-        fdr_cutoff = config['methylseekr_fdr_cutoff']
+        fdr_cutoff = config['methylseekr_fdr_cutoff'],
+        cgi_annotation_file = cgi_annotation_file,
+        gene_annotation_file = gene_annotation_file,
+        repeat_masker_annotation_file = repeat_masker_annotation_file,
+        transcript_start_site_file = transcript_start_site_file,
     log:
         log_dir + '/methylseekr.log'
     benchmark:

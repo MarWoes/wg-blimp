@@ -28,10 +28,10 @@ if (exists("snakemake")) {
    # save.image(file = "scripts/dmr-annotation-snakemake.Rdata")
    wgbs.annotateDMRs(
      snakemake@input$combined_dmrs,
-     snakemake@input$cgi_annotation_file,
-     snakemake@input$gene_annotation_file,
-     snakemake@input$repeat_masker_annotation_file,
-     snakemake@input$transcript_start_site_file,
+     snakemake@params$cgi_annotation_file,
+     snakemake@params$gene_annotation_file,
+     snakemake@params$repeat_masker_annotation_file,
+     snakemake@params$transcript_start_site_file,
      snakemake@input$coverages,
      snakemake@params$biotypes,
      snakemake@params$tss_distances,
