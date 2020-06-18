@@ -13,7 +13,7 @@ To run `wg-blimp` you need a UNIX environment that contains a [Bioconda](http://
 It is advised to install `wg-blimp` through Bioconda. It is also recommended to install `wg-blimp` in a fresh environment, as it has many dependencies that may conflict with other packages, for this you can use:
 
 ```
-conda create -n wg-blimp wg-blimp python=3.6.7 r-base=3.6.2
+conda create -n wg-blimp wg-blimp python=3.6.7 r-base=3.6.2 snakemake-minimal=5.8.1 methyldackel==0.4.0
 ```
 
 ### Docker
