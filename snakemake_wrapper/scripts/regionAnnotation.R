@@ -2,6 +2,20 @@ library(data.table)
 library(GenomicRanges)
 library(stringr)
 
+annotation.isExistingFileOrNone <- function (fileName) {
+
+  if (fileName == "None") {
+    return(FALSE)
+  }
+
+  if (file.exists(fileName)) {
+    return(TRUE)
+  }
+
+  stop(paste0("Annotation file not found: ", fileName))
+
+}
+
 annotation.annotateOverlap <- function (regionRanges, overlapRanges, geneTable) {
 
   intersection <- as.list(findOverlaps(regionRanges, overlapRanges))
@@ -57,26 +71,42 @@ annotation.annotateRepeats <- function (regions, regionRanges, repeats, classes)
 
 annotation.annotateRegions <- function (regionTable, gzippedCgiFile, gzippedGeneFile, gzippedRepeatMaskerAnnotationFile, gzippedTranscriptionStartSiteFile, allowedBiotypes, promoterTSSDistances) {
 
-  cgis <- fread(cmd = paste("zcat", gzippedCgiFile))
-  genes <- fread(cmd = paste("zcat", gzippedGeneFile))
-  transcriptStartSites <- fread(cmd = paste("zcat", gzippedTranscriptionStartSiteFile))
-  repeats <- fread(cmd = paste("zcat", gzippedRepeatMaskerAnnotationFile))
-
-  cgis$chrom <- substr(cgis$chrom, 4, nchar(cgis$chrom))
-  repeats$genoName <- substr(repeats$genoName, 4, nchar(repeats$genoName))
-
-  genes <- genes[gene_biotype %in% allowedBiotypes]
-  transcriptStartSites <- transcriptStartSites[gene_biotype %in% allowedBiotypes]
-
   regionTable$length <- regionTable$end - regionTable$start
 
   # remove any trailing 'chr's for range intersection
   regionRanges  <- GRanges(seqnames = str_remove(regionTable$chr, "^chr"), ranges = IRanges(regionTable$start, regionTable$end))
 
-  regionTable <- annotation.annotateGenes(regionTable, regionRanges, genes)
-  regionTable <- annotation.annotateCGIslands(regionTable, regionRanges, cgis)
-  regionTable <- annotation.annotatePromoters(regionTable, regionRanges, transcriptStartSites, promoterTSSDistances)
-  regionTable <- annotation.annotateRepeats(regionTable, regionRanges, repeats, c("LINE", "SINE", "LTR", "DNA"))
+  if (annotation.isExistingFileOrNone(gzippedCgiFile)) {
+
+    cgis <- fread(cmd = paste("zcat", gzippedCgiFile))
+    cgis$chrom <- substr(cgis$chrom, 4, nchar(cgis$chrom))
+    regionTable <- annotation.annotateCGIslands(regionTable, regionRanges, cgis)
+
+  }
+
+  if (annotation.isExistingFileOrNone(gzippedGeneFile)) {
+
+    genes <- fread(cmd = paste("zcat", gzippedGeneFile))
+    genes <- genes[gene_biotype %in% allowedBiotypes]
+    regionTable <- annotation.annotateGenes(regionTable, regionRanges, genes)
+
+  }
+
+  if (annotation.isExistingFileOrNone(gzippedTranscriptionStartSiteFile)) {
+
+    transcriptStartSites <- fread(cmd = paste("zcat", gzippedTranscriptionStartSiteFile))
+    transcriptStartSites <- transcriptStartSites[gene_biotype %in% allowedBiotypes]
+    regionTable <- annotation.annotatePromoters(regionTable, regionRanges, transcriptStartSites, promoterTSSDistances)
+
+  }
+
+  if (annotation.isExistingFileOrNone(gzippedRepeatMaskerAnnotationFile)) {
+
+    repeats <- fread(cmd = paste("zcat", gzippedRepeatMaskerAnnotationFile))
+    repeats$genoName <- substr(repeats$genoName, 4, nchar(repeats$genoName))
+    regionTable <- annotation.annotateRepeats(regionTable, regionRanges, repeats, c("LINE", "SINE", "LTR", "DNA"))
+
+  }
 
   return(regionTable)
 }

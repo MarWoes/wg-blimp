@@ -19,10 +19,10 @@ metilene_dir = dmr_dir + '/metilene'
 bsseq_dir = dmr_dir + '/bsseq'
 camel_dir = dmr_dir + '/camel'
 
-cgi_annotation_file = snakemake_dir + '/' + config['cgi_annotation_file']
-gene_annotation_file = snakemake_dir + '/' + config['gene_annotation_file']
-repeat_masker_annotation_file = snakemake_dir + '/' + config['repeat_masker_annotation_file']
-transcript_start_site_file = snakemake_dir + '/' + config['transcript_start_site_file']
+cgi_annotation_file = config['cgi_annotation_file']
+gene_annotation_file = config['gene_annotation_file']
+repeat_masker_annotation_file = config['repeat_masker_annotation_file']
+transcript_start_site_file = config['transcript_start_site_file']
 
 num_threads = config['computing_threads']
 io_threads = config['io_threads']
@@ -416,16 +416,6 @@ rule dmr_coverage:
         benchmark_dir + '/dmr_coverage/{sample}.tsv'
     shell:
         'mosdepth --threads {threads} --no-per-base --mapq {params.min_mapq} --by {input.bed} $(dirname {output})/{wildcards.sample} {input.bam}'
-
-rule repeat_masker_download:
-    output:
-        gzipped_csv = snakemake_dir + '/' + config['repeat_masker_annotation_file']
-    params:
-        link = config['repeat_masker_links'][config['repeat_masker_annotation_file']]
-    log:
-        log_dir + '/repeat_masker_download.log'
-    shell:
-        'wget -O {output} {params.link} 2> {log}'
 
 rule dmr_annotation:
     input:
