@@ -6,11 +6,11 @@ if (exists("snakemake")) {
 }
 
 library(MethylSeekR)
-library(BSgenome)
 library(stringr)
 library(data.table)
 library(rtracklayer)
 library(parallel)
+library(Biostrings)
 
 ### GLOBALS
 
@@ -31,7 +31,6 @@ segmentIntoUMRsAndLMRs <- function(sample, methylationRanges, cgiRanges, numThre
   )
   dev.off()
 
-  # TODO: use other values than the default one?
   selectedN <- as.integer(names(fdrStats$FDRs[as.character(methylationCutoff), ][fdrStats$FDRs[as.character(methylationCutoff), ] < fdrCutoff])[1])
 
   png(paste0(targetDir, "/umr-lmr-heatmap.png"))
@@ -70,27 +69,16 @@ segmentIntoUMRsAndLMRs <- function(sample, methylationRanges, cgiRanges, numThre
     pmds_masked = !(length(pmdSegments) == 1 && is.na(pmdSegments))
   )
 
-  if (!sequencesStartingWithChr) {
-    umrLmrTable$chr <- str_remove(umrLmrTable$chr, "^chr")
-  }
-
   fwrite(umrLmrTable, file = paste0(targetDir, "/umr-lmr.csv"))
 }
 
-loadOrInstall <- function(packageName) {
+# HACK: create own class for DNAStringSets with MethylSeekR. Otherwise one would always have to
+# install own packages. Also, general FASTA files could not be used otherwise
+setClass("BlimpDnaStringSet", contains = "DNAStringSet")
+setMethod("getSeq", "BlimpDnaStringSet", function (x, names, ...) {
+  callNextMethod(x, names)
+})
 
-  isPackageInstalled <- packageName %in% rownames(installed.packages())
-
-  if (!isPackageInstalled) {
-
-    if (!requireNamespace("BiocManager", quietly = TRUE))
-      install.packages("BiocManager", repo = "http://cran.rstudio.com/")
-
-    BiocManager::install(packageName)
-  }
-
-  library(packageName, character.only = TRUE)
-}
 
 ### INPUT
 
@@ -98,7 +86,7 @@ loadOrInstall <- function(packageName) {
 #  save.image("methylseekr-debug.rds")
 # }
 
-fastaRef <- snakemake@input$ref
+fastaRefFile <- snakemake@input$ref
 cgiAnnotationFile <- snakemake@params$cgi_annotation_file
 geneAnnotationFile <- snakemake@params$gene_annotation_file
 repeatMaskerAnnotationFile <- snakemake@params$repeat_masker_annotation_file
@@ -117,24 +105,30 @@ minimumCoverage <- snakemake@params$min_coverage
 fdrCutoff <- snakemake@params$fdr_cutoff
 methylationCutoff <- snakemake@params$methylation_cutoff
 
-targetGenomeBS <- paste0("BSgenome.Hsapiens.UCSC.", targetGenomeName)
-
-loadOrInstall(targetGenomeBS)
 snakemake@source("regionAnnotation.R")
 
 ### SCRIPT
 
-referenceBS <- get(targetGenomeBS)
+fastaRef <- readDNAStringSet(fastaRefFile)
+class(fastaRef) <- "BlimpDnaStringSet"
 
-# since own FASTA files may not be used with methylseekr, UCSC/GRCh 'chr's need to be taken care of
-calibrationChr <- str_replace(calibrationChr, "^(?!chr)", "chr")
+if (file.exists(cgiAnnotationFile)) {
 
-# query CGI's
-session <- browserSession()
-genome(session) <- targetGenomeName
-query <- ucscTableQuery(session, "cpgIslandExt")
-cgiRanges <- track(query)
-genome(cgiRanges) <- NA
+  cgiAnnotation <- fread(cmd = paste("zcat", cgiAnnotationFile))
+
+  # detect chromosome naming ('chr1' vs '1') and
+  # adjust cgi chromosome names accordingly
+  if(sum(str_count(names(fastaRef), "^chr")) == 0) {
+    cgiAnnotation$chrom <- str_remove(cgiAnnotation$chrom, "^chr")
+  }
+
+  cgiRanges <- GRanges(cgiAnnotation$chrom, IRanges(cgiAnnotation$chromStart, cgiAnnotation$chromEnd))
+
+} else {
+
+  stop("[ERROR] No CGIs set for segmentation. CGIs must be set to perform segmentation with MethylSeekR.")
+}
+
 cgiRanges <- suppressWarnings(resize(cgiRanges, 5000, fix = "center"))
 
 for (sample in samples) {
@@ -146,25 +140,16 @@ for (sample in samples) {
     col.names = c("chr", "start", "end", "methPercent", "methylated", "unmethylated")
   )
 
-  # restore 'non-chr' notation after computation is done
-  sequencesStartingWithChr <- any(str_count(methylationValues$chr, "^chr")) > 0
-
-  # adjust possibly faulty 'chr's here too
-  methylationValues$chr <- str_replace(methylationValues$chr, "^(?!chr)", "chr")
-
   sampleRanges <- GRanges(methylationValues$chr, ranges = methylationValues$start)
   values(sampleRanges)$T <- methylationValues$methylated + methylationValues$unmethylated
   values(sampleRanges)$M <- methylationValues$methylated
-
-  # only keep ranges that match the reference genome
-  sampleRanges <- sampleRanges[as.logical(seqnames(sampleRanges) %in% seqnames(referenceBS))]
 
   png(paste0(targetDir, "/", sample, "/alphaCalibration.png"))
   pmdSegments <- segmentPMDs(
     m = sampleRanges,
     chr.sel = calibrationChr,
     num.cores = numThreads,
-    seqLengths = seqlengths(referenceBS)
+    seqLengths = seqlengths(fastaRef)
   )
   dev.off()
 
@@ -194,10 +179,6 @@ for (sample in samples) {
   )
   pmdSegmentTable <- pmdSegmentTable[type == "PMD"]
 
-  if (!sequencesStartingWithChr) {
-    pmdSegmentTable$chr <- str_remove(pmdSegmentTable$chr, "^chr")
-  }
-
   fwrite(pmdSegmentTable, file = paste0(targetDir, "/", sample, "/pmd-segments.csv"))
 
   segmentIntoUMRsAndLMRs(
@@ -206,10 +187,9 @@ for (sample in samples) {
     cgiRanges = cgiRanges,
     numThreads = numThreads,
     targetDir = paste0(targetDir, "/", sample, "/LMRUMRwithPMD/"),
-    genomeSeq = referenceBS,
-    seqLengths = seqlengths(referenceBS),
+    genomeSeq = fastaRef,
+    seqLengths = seqlengths(fastaRef),
     pmdSegments = pmdSegments,
-    sequencesStartingWithChr = sequencesStartingWithChr,
     minCoverage = minimumCoverage,
     fdrCutoff = fdrCutoff,
     methylationCutoff = methylationCutoff
@@ -221,10 +201,9 @@ for (sample in samples) {
     cgiRanges = cgiRanges,
     numThreads = numThreads,
     targetDir = paste0(targetDir, "/", sample, "/LMRUMRwithoutPMD/"),
-    genomeSeq = referenceBS,
-    seqLengths = seqlengths(referenceBS),
+    genomeSeq = fastaRef,
+    seqLengths = seqlengths(fastaRef),
     pmdSegments = NA,
-    sequencesStartingWithChr = sequencesStartingWithChr,
     minCoverage = minimumCoverage,
     fdrCutoff = fdrCutoff,
     methylationCutoff = methylationCutoff
