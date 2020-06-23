@@ -8,13 +8,13 @@ if (exists("snakemake")) {
 }
 
 
-wgbs.annotateDMRs <- function (dmrFile, gzippedCgiFile, gzippedGeneFile, gzippedRepeatMaskerAnnotationFile, gzippedTranscriptionStartSiteFile, gzippedCoverageFiles, allowedBiotypes, promoterTSSDistances, annotatedDmrFile) {
+wgbs.annotateDMRs <- function (dmrFile, gzippedCgiFile, gzippedGeneFile, gzippedRepeatMaskerAnnotationFile, gzippedCoverageFiles, allowedBiotypes, promoterTSSDistances, annotatedDmrFile) {
 
   dmrs <- fread(dmrFile)
 
-  dmrs <- annotation.annotateRegions(dmrs, gzippedCgiFile, gzippedGeneFile, gzippedRepeatMaskerAnnotationFile, gzippedTranscriptionStartSiteFile, allowedBiotypes, promoterTSSDistances)
+  dmrs <- annotation.annotateRegions(dmrs, gzippedCgiFile, gzippedGeneFile, gzippedRepeatMaskerAnnotationFile, allowedBiotypes, promoterTSSDistances)
 
-  coverages <- sapply(gzippedCoverageFiles, function (gzippedCoverageFile) fread(paste("zcat", gzippedCoverageFile))$V4)
+  coverages <- sapply(gzippedCoverageFiles, function (gzippedCoverageFile) fread( cmd= paste("zcat", gzippedCoverageFile))$V4)
 
   dmrs$mean_cov <- apply(coverages, 1, mean)
 
@@ -25,13 +25,12 @@ wgbs.annotateDMRs <- function (dmrFile, gzippedCgiFile, gzippedGeneFile, gzipped
 
 if (exists("snakemake")) {
 
-   # save.image(file = "scripts/dmr-annotation-snakemake.Rdata")
+   # save.image(file = "dmr-annotation-snakemake.Rdata")
    wgbs.annotateDMRs(
      snakemake@input$combined_dmrs,
      snakemake@params$cgi_annotation_file,
      snakemake@params$gene_annotation_file,
      snakemake@params$repeat_masker_annotation_file,
-     snakemake@params$transcript_start_site_file,
      snakemake@input$coverages,
      snakemake@params$biotypes,
      snakemake@params$tss_distances,

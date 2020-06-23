@@ -1,5 +1,6 @@
 library(data.table)
 library(GenomicRanges)
+library(rtracklayer)
 library(stringr)
 
 annotation.isExistingFileOrNone <- function (fileName) {
@@ -28,11 +29,13 @@ annotation.annotateOverlap <- function (regionRanges, overlapRanges, geneTable) 
   ))
 }
 
-annotation.annotateGenes <- function (regions, regionRanges, genes) {
+annotation.annotateGenes <- function (regions, regionRanges, gtfRanges) {
 
-  geneRanges <- GRanges(seqnames = genes$chromosome_name, ranges = IRanges(genes$start_position, genes$end_position))
+  geneGtfRanges = gtfRanges[gtfRanges$type == "gene"]
 
-  regions[,c("gene_overlap", "gene_name")] <- annotation.annotateOverlap(regionRanges, geneRanges, genes)
+  geneNames <- data.table(external_gene_name = geneGtfRanges$gene_name)
+
+  regions[,c("gene_overlap", "gene_name")] <- annotation.annotateOverlap(regionRanges, geneGtfRanges, geneNames)
 
   return(regions)
 }
@@ -46,14 +49,26 @@ annotation.annotateCGIslands <- function (regions, regionRanges, cgis) {
   return(regions)
 }
 
-annotation.annotatePromoters <- function (regions, regionRanges, transcriptStartSites, promoterTSSDistances) {
+annotation.annotatePromoters <- function (regions, regionRanges, gtfRanges, promoterTSSDistances) {
 
-  promoterStarts <- transcriptStartSites$transcription_start_site + promoterTSSDistances[1]
-  promoterEnds <- transcriptStartSites$transcription_start_site + promoterTSSDistances[2]
+  transcriptRanges = gtfRanges[gtfRanges$type == "transcript"]
+  geneNames = data.table(external_gene_name = transcriptRanges$gene_name)
 
-  promoterRanges <- GRanges(seqnames = transcriptStartSites$chromosome_name, ranges = IRanges(promoterStarts, promoterEnds))
+  promoterStarts <- ifelse(
+    strand(transcriptRanges) == "+",
+    start(transcriptRanges) + promoterTSSDistances[1],
+    end(transcriptRanges) - promoterTSSDistances[2]
+  )
 
-  regions[,c("promoter_overlap", "promoter_name")] <- annotation.annotateOverlap(regionRanges, promoterRanges, transcriptStartSites)
+  promoterEnds <- ifelse(
+    strand(transcriptRanges) == "+",
+    start(transcriptRanges) + promoterTSSDistances[2],
+    end(transcriptRanges) - promoterTSSDistances[1]
+  )
+
+  promoterRanges <- GRanges(seqnames = seqnames(transcriptRanges), ranges = IRanges(promoterStarts, promoterEnds))
+
+  regions[,c("promoter_overlap", "promoter_name")] <- annotation.annotateOverlap(regionRanges, promoterRanges, geneNames)
 
   return(regions)
 }
@@ -69,7 +84,7 @@ annotation.annotateRepeats <- function (regions, regionRanges, repeats, classes)
   return(regions)
 }
 
-annotation.annotateRegions <- function (regionTable, gzippedCgiFile, gzippedGeneFile, gzippedRepeatMaskerAnnotationFile, gzippedTranscriptionStartSiteFile, allowedBiotypes, promoterTSSDistances) {
+annotation.annotateRegions <- function (regionTable, gzippedCgiFile, gzippedGTFFile, gzippedRepeatMaskerAnnotationFile, allowedBiotypes, promoterTSSDistances) {
 
   regionTable$length <- regionTable$end - regionTable$start
 
@@ -79,31 +94,25 @@ annotation.annotateRegions <- function (regionTable, gzippedCgiFile, gzippedGene
   if (annotation.isExistingFileOrNone(gzippedCgiFile)) {
 
     cgis <- fread(cmd = paste("zcat", gzippedCgiFile))
-    cgis$chrom <- substr(cgis$chrom, 4, nchar(cgis$chrom))
+    cgis$chrom <- str_remove(cgis$chrom, "^chr")
     regionTable <- annotation.annotateCGIslands(regionTable, regionRanges, cgis)
 
   }
 
-  if (annotation.isExistingFileOrNone(gzippedGeneFile)) {
+  if (annotation.isExistingFileOrNone(gzippedGTFFile)) {
 
-    genes <- fread(cmd = paste("zcat", gzippedGeneFile))
-    genes <- genes[gene_biotype %in% allowedBiotypes]
-    regionTable <- annotation.annotateGenes(regionTable, regionRanges, genes)
+    gtfRanges <- import(gzippedGTFFile)
+    gtfRanges <- gtfRanges[gtfRanges$gene_type %in% allowedBiotypes]
+    gtfRanges <- renameSeqlevels(gtfRanges, str_remove(seqlevels(gtfRanges), "^chr"))
 
-  }
-
-  if (annotation.isExistingFileOrNone(gzippedTranscriptionStartSiteFile)) {
-
-    transcriptStartSites <- fread(cmd = paste("zcat", gzippedTranscriptionStartSiteFile))
-    transcriptStartSites <- transcriptStartSites[gene_biotype %in% allowedBiotypes]
-    regionTable <- annotation.annotatePromoters(regionTable, regionRanges, transcriptStartSites, promoterTSSDistances)
-
+    regionTable <- annotation.annotateGenes(regionTable, regionRanges, gtfRanges)
+    regionTable <- annotation.annotatePromoters(regionTable, regionRanges, gtfRanges, promoterTSSDistances)
   }
 
   if (annotation.isExistingFileOrNone(gzippedRepeatMaskerAnnotationFile)) {
 
     repeats <- fread(cmd = paste("zcat", gzippedRepeatMaskerAnnotationFile))
-    repeats$genoName <- substr(repeats$genoName, 4, nchar(repeats$genoName))
+    repeats$genoName <- str_remove(repeats$genoName, "^chr")
     regionTable <- annotation.annotateRepeats(regionTable, regionRanges, repeats, c("LINE", "SINE", "LTR", "DNA"))
 
   }

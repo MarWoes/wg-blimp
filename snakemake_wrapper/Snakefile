@@ -20,9 +20,8 @@ bsseq_dir = dmr_dir + '/bsseq'
 camel_dir = dmr_dir + '/camel'
 
 cgi_annotation_file = config['cgi_annotation_file']
-gene_annotation_file = config['gene_annotation_file']
 repeat_masker_annotation_file = config['repeat_masker_annotation_file']
-transcript_start_site_file = config['transcript_start_site_file']
+gene_annotation_file = config['gene_gtf_annotation_file']
 
 num_threads = config['computing_threads']
 io_threads = config['io_threads']
@@ -429,8 +428,7 @@ rule dmr_annotation:
         tss_distances = config['promoter_tss_distances'],
         cgi_annotation_file = cgi_annotation_file,
         gene_annotation_file = gene_annotation_file,
-        repeat_masker_annotation_file = repeat_masker_annotation_file,
-        transcript_start_site_file = transcript_start_site_file
+        repeat_masker_annotation_file = repeat_masker_annotation_file
     log:
         log_dir + '/dmr_annotation.log'
     benchmark:
@@ -464,8 +462,7 @@ rule methylseekr:
         fdr_cutoff = config['methylseekr_fdr_cutoff'],
         cgi_annotation_file = cgi_annotation_file,
         gene_annotation_file = gene_annotation_file,
-        repeat_masker_annotation_file = repeat_masker_annotation_file,
-        transcript_start_site_file = transcript_start_site_file,
+        repeat_masker_annotation_file = repeat_masker_annotation_file
     log:
         log_dir + '/methylseekr.log'
     benchmark:

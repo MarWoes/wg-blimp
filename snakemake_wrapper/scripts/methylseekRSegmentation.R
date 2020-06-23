@@ -90,7 +90,6 @@ fastaRefFile <- snakemake@input$ref
 cgiAnnotationFile <- snakemake@params$cgi_annotation_file
 geneAnnotationFile <- snakemake@params$gene_annotation_file
 repeatMaskerAnnotationFile <- snakemake@params$repeat_masker_annotation_file
-transcriptStartSiteFile <- snakemake@params$transcript_start_site_file
 samples <- snakemake@params$samples
 targetDir <- snakemake@params$target_dir
 methylationDir <- snakemake@params$methylation_dir
@@ -225,7 +224,6 @@ annotatedPmdTable <- annotation.annotateRegions(
   cgiAnnotationFile,
   geneAnnotationFile,
   repeatMaskerAnnotationFile,
-  transcriptStartSiteFile,
   allowedBiotypes,
   tssDistances
 )
@@ -235,7 +233,6 @@ annotatedUmrLmrTable <- annotation.annotateRegions(
   cgiAnnotationFile,
   geneAnnotationFile,
   repeatMaskerAnnotationFile,
-  transcriptStartSiteFile,
   allowedBiotypes,
   tssDistances
 )
