@@ -83,13 +83,13 @@ wgbs.loadMetileneData <- function (metileneFile) {
 
 }
 
-wgbs.combineDmrs <- function (bsseqFile, camelFile, metileneFile, csvOutput, bedOutput, minCpG, minDiff) {
+wgbs.combineDmrs <- function (bsseqFile, camelFile, metileneFile, fastaIndex, csvOutput, bedOutput, minCpG, minDiff) {
 
   bsseqRanges    <- wgbs.loadBsseqData(bsseqFile, minCpG, minDiff)
   camelRanges    <- wgbs.loadCamelData(camelFile)
   metileneRanges <- wgbs.loadMetileneData(metileneFile)
 
-  combinedRanges <- c(bsseqRanges, camelRanges, metileneRanges)#, simpleRanges)
+  combinedRanges <- c(bsseqRanges, camelRanges, metileneRanges)
 
   seqs <- as.character(seqnames(combinedRanges))
 
@@ -104,8 +104,10 @@ wgbs.combineDmrs <- function (bsseqFile, camelFile, metileneFile, csvOutput, bed
     stringsAsFactors = FALSE
   )
 
+  fastaIndex <- fread(fastaIndex)
+
   # define own sort order
-  seqFactors <- factor(seqs, levels = c(1:22, "X", "Y", "MT", "LAMBDA"))
+  seqFactors <- factor(seqs, levels = fastaIndex$V1)
 
   sortedDMRs <- combinedDMRs[order(seqFactors, combinedDMRs$start, combinedDMRs$end),]
 
@@ -122,6 +124,7 @@ if (exists("snakemake")) {
     snakemake@input$bsseq,
     snakemake@input$camel,
     snakemake@input$metilene,
+    snakemake@input$fasta_index,
     snakemake@output$csv,
     snakemake@output$bed,
     snakemake@config$min_cpg,
