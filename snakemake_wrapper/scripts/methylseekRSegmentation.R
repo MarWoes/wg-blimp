@@ -110,24 +110,25 @@ snakemake@source("regionAnnotation.R")
 fastaRef <- readDNAStringSet(fastaRefFile)
 class(fastaRef) <- "BlimpDnaStringSet"
 
-if (file.exists(cgiAnnotationFile)) {
-
-  cgiAnnotation <- fread(cmd = paste("zcat", cgiAnnotationFile))
-
-  # detect chromosome naming ('chr1' vs '1') and
-  # adjust cgi chromosome names accordingly
-  if(sum(str_count(names(fastaRef), "^chr")) == 0) {
-    cgiAnnotation$chrom <- str_remove(cgiAnnotation$chrom, "^chr")
-  }
-
-  cgiRanges <- GRanges(cgiAnnotation$chrom, IRanges(cgiAnnotation$chromStart, cgiAnnotation$chromEnd))
-
-} else {
+if (is.null(cgiAnnotationFile) || !file.exists(cgiAnnotationFile)) {
 
   stop("[ERROR] No CGIs set for segmentation. CGIs must be set to perform segmentation with MethylSeekR.")
+
 }
 
+cgiAnnotation <- fread(cmd = paste("zcat", cgiAnnotationFile))
+
+# detect chromosome naming ('chr1' vs '1') and
+# adjust cgi chromosome names accordingly
+if(sum(str_count(names(fastaRef), "^chr")) == 0) {
+  cgiAnnotation$chrom <- str_remove(cgiAnnotation$chrom, "^chr")
+  calibrationChr <- str_remove(calibrationChr, "^chr")
+}
+
+cgiRanges <- GRanges(cgiAnnotation$chrom, IRanges(cgiAnnotation$chromStart, cgiAnnotation$chromEnd))
 cgiRanges <- suppressWarnings(resize(cgiRanges, 5000, fix = "center"))
+
+
 
 for (sample in samples) {
 

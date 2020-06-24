@@ -30,7 +30,7 @@ annotation_allowed_biotypes: [
   'miRNA'
 ]
 methylation_rate_on_chromosomes: []
-methylseekr_pmd_chromosome: '22'
+methylseekr_pmd_chromosome: 'chr22'
 methylseekr_fdr_cutoff: 5
 methylseekr_methylation_cutoff: 0.5
 qualimap_memory_gb:
