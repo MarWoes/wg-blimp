@@ -14,7 +14,15 @@ wgbs.annotateDMRs <- function (dmrFile, gzippedCgiFile, gzippedGeneFile, gzipped
 
   dmrs <- annotation.annotateRegions(dmrs, gzippedCgiFile, gzippedGeneFile, gzippedRepeatMaskerAnnotationFile, allowedBiotypes, promoterTSSDistances)
 
-  coverages <- sapply(gzippedCoverageFiles, function (gzippedCoverageFile) fread( cmd= paste("zcat", gzippedCoverageFile))$V4)
+  dmrLocationKeys <- paste0(dmrs$chr, ":", dmrs$start, "-", dmrs$end)
+
+  coverages <- sapply(gzippedCoverageFiles, function (gzippedCoverageFile) {
+
+    coverage = fread(cmd = paste("zcat", gzippedCoverageFile))
+    coverageLocationKeys = paste0(coverage$V1, ":", coverage$V2, "-", coverage$V3)
+
+    return(coverage$V4[match(dmrLocationKeys, coverageLocationKeys)])
+  })
 
   dmrs$mean_cov <- apply(coverages, 1, mean)
 
