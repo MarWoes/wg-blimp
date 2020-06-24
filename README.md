@@ -13,7 +13,7 @@ To run `wg-blimp` you need a UNIX environment that contains a [Bioconda](http://
 It is advised to install `wg-blimp` through Bioconda. It is also recommended to install `wg-blimp` in a fresh environment, as it has many dependencies that may conflict with other packages, for this you can use:
 
 ```
-conda create -n wg-blimp wg-blimp python=3.6.7 r-base=3.6.2
+conda create -n wg-blimp wg-blimp python=3.6.7 r-base=3.6.2 snakemake-minimal=5.8.1 methyldackel==0.4.0
 ```
 
 ### Docker
@@ -134,3 +134,7 @@ The following entries are used for running the Snakemake pipeline and may be spe
 
 ## Reporting errors / Requesting features
 If anything goes wrong using `wg-blimp` or any features are missing, feel free to open an issue or to contact Marius Wöste ( mar.w@wwu.de )
+
+## Citing
+Please make sure to cite the [BMC software article](https://doi.org/10.1186/s12859-020-3470-5) when using wg-blimp for research purposes:
+> Wöste, M., Leitão, E., Laurentino, S. et al. wg-blimp: an end-to-end analysis pipeline for whole genome bisulfite sequencing data. BMC Bioinformatics 21, 169 (2020). https://doi.org/10.1186/s12859-020-3470-5
