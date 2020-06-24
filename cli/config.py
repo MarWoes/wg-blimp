@@ -1,32 +1,66 @@
 import os
+import requests
 from ruamel.yaml import YAML
 
 script_dir = os.path.dirname(os.path.realpath(__file__))
 
-CGI_LOCATION_FILE    = 'annotation/cgi-locations-{}.csv.gz'
-GENE_ANNOTATION_FILE = 'annotation/gene-locations-{}.csv.gz'
-REPEAT_MASKER_FILE   = 'annotation/repeat-masker-{}.csv.gz'
-TSS_FILE             = 'annotation/transcription-start-sites-{}.csv.gz'
+annotation_dir = os.path.join(script_dir, '..', 'snakemake_wrapper', 'annotation')
 
+CGI_LOCATION_FILE_TEMPLATE    = os.path.normpath(os.path.join(annotation_dir, 'cgi-locations-{}.csv.gz'))
+REPEAT_MASKER_FILE_TEMPLATE   = os.path.normpath(os.path.join(annotation_dir, 'repeat-masker-{}.csv.gz'))
+GTF_ANNOTATION_FILE_TEMPLATE  = os.path.normpath(os.path.join(annotation_dir, 'gencode.v34.{}.gtf.gz'))
+
+ANNOTATION_DOWNLOAD_LINKS_FILE = os.path.join(script_dir, 'annotation_download_links.yaml')
 DEFAULT_OPTIONALS_FILE = os.path.join(script_dir, 'optionals.yaml')
 
 yaml = YAML(typ='safe')
 yaml.default_flow_style = False
 
+
+def download_if_necessary(file_name):
+
+    if not os.path.isfile(file_name):
+
+        print("[WARNING] " + file_name + " not found. Attempting download from public repositories.")
+
+        with open(ANNOTATION_DOWNLOAD_LINKS_FILE) as f:
+
+            annotation_links = yaml.load(f)
+
+            base_file = os.path.basename(file_name)
+
+            target_url = annotation_links['download_links'][base_file]
+
+            print("[INFO] Downloading file " + base_file + " from " + target_url)
+
+            request = requests.get(target_url, allow_redirects = True)
+            open(file_name, 'wb').write(request.content)
+
+
 def get_reference_annotation_files(genome_build):
 
+    if genome_build is 'None':
+
+        print("[WARNING] Segmentation with MethylSeekR requires CGI annotation.")
+        print("[WARNING] Set 'cgi_annotation_file' accordingly or remove 'segmentation/umr-lmr-all.csv' from 'target_files' in configuration file to prevent errors.")
+
+        return {
+            'cgi_annotation_file': None,
+            'gtf_annotation_file': None,
+            'repeat_masker_annotation_file': None
+        }
+
+    cgi_location_file = CGI_LOCATION_FILE_TEMPLATE.format(genome_build)
+    gtf_annotation_file = GTF_ANNOTATION_FILE_TEMPLATE.format(genome_build)
+    repeat_masker_annotation_file = REPEAT_MASKER_FILE_TEMPLATE.format(genome_build)
+
+    download_if_necessary(gtf_annotation_file)
+    download_if_necessary(repeat_masker_annotation_file)
+
     return {
-        'cgi_annotation_file':
-          CGI_LOCATION_FILE.format(genome_build),
-
-        'gene_annotation_file':
-          GENE_ANNOTATION_FILE.format(genome_build),
-
-        'repeat_masker_annotation_file':
-          REPEAT_MASKER_FILE.format(genome_build),
-
-        'transcript_start_site_file':
-          TSS_FILE.format(genome_build)
+        'cgi_annotation_file': cgi_location_file,
+        'gtf_annotation_file': gtf_annotation_file,
+        'repeat_masker_annotation_file': repeat_masker_annotation_file
     }
 
 

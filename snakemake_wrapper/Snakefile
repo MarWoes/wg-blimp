@@ -21,7 +21,7 @@ camel_dir = dmr_dir + '/camel'
 
 cgi_annotation_file = config['cgi_annotation_file']
 repeat_masker_annotation_file = config['repeat_masker_annotation_file']
-gene_annotation_file = config['gene_gtf_annotation_file']
+gene_annotation_file = config['gtf_annotation_file']
 
 num_threads = config['computing_threads']
 io_threads = config['io_threads']

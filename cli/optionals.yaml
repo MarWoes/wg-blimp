@@ -25,25 +25,10 @@ promoter_tss_distances: [
   1000
 ]
 annotation_allowed_biotypes: [
-  # protein coding genes
   'protein_coding',
-  # lncRNA
-  'non_coding',
-  '3prime_overlapping_ncRNA',
-  'antisense',
-  'lincRNA',
-  'retained_intron',
-  'sense_intronic',
-  'sense_overlapping',
-  'macro_lncRNA',
-  'bidirectional_promoter_lncRNA',
-  # miRNA
+  'lncRNA',
   'miRNA'
 ]
-repeat_masker_links: {
-  'annotation/repeat-masker-hg38.csv.gz': 'https://uni-muenster.sciebo.de/s/LwMik3kKY83oVT0/download',
-  'annotation/repeat-masker-hg19.csv.gz': 'https://uni-muenster.sciebo.de/s/tFPOT7weAc5eGLG/download'
-}
 methylation_rate_on_chromosomes: []
 methylseekr_pmd_chromosome: '22'
 methylseekr_fdr_cutoff: 5

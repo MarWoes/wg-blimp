@@ -5,11 +5,11 @@ library(stringr)
 
 annotation.isExistingFileOrNone <- function (fileName) {
 
-  if (fileName == "None") {
+  if (is.null(fileName)) {
     return(FALSE)
   }
 
-  if (file.exists(fileName)) {
+  if (length(fileName) == 1 && file.exists(fileName)) {
     return(TRUE)
   }
 
