@@ -94,7 +94,6 @@ samples <- snakemake@params$samples
 targetDir <- snakemake@params$target_dir
 methylationDir <- snakemake@params$methylation_dir
 calibrationChr <- snakemake@params$calibration_chr
-targetGenomeName <- snakemake@params$genome_build
 allowedBiotypes <- snakemake@params$biotypes
 tssDistances <- snakemake@params$tss_distances
 numThreads <- snakemake@threads
