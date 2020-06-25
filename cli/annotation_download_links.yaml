@@ -1,6 +1,9 @@
 download_links: {
   'repeat-masker-hg38.csv.gz': 'https://uni-muenster.sciebo.de/s/LwMik3kKY83oVT0/download',
   'repeat-masker-hg19.csv.gz': 'https://uni-muenster.sciebo.de/s/tFPOT7weAc5eGLG/download',
-  'gencode.v34.hg38.gtf.gz': 'http://ftp.ebi.ac.uk/pub/databases/gencode/Gencode_human/release_34/gencode.v34.annotation.gtf.gz',
-  'gencode.v34.hg19.gtf.gz': 'http://ftp.ebi.ac.uk/pub/databases/gencode/Gencode_human/release_34/GRCh37_mapping/gencode.v34lift37.annotation.gtf.gz'
+  'repeat-masker-mmul10.csv.gz': 'https://uni-muenster.sciebo.de/s/X9Ma6rMNL2WkFNa/download',
+
+  'genes.hg38.gtf.gz': 'http://ftp.ebi.ac.uk/pub/databases/gencode/Gencode_human/release_34/gencode.v34.annotation.gtf.gz',
+  'genes.hg19.gtf.gz': 'http://ftp.ebi.ac.uk/pub/databases/gencode/Gencode_human/release_34/GRCh37_mapping/gencode.v34lift37.annotation.gtf.gz',
+  'genes.mmul10.gtf.gz': 'http://ftp.ensembl.org/pub/release-100/gtf/macaca_mulatta/Macaca_mulatta.Mmul_10.100.gtf.gz'
 }

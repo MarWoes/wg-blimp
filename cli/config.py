@@ -8,7 +8,7 @@ annotation_dir = os.path.join(script_dir, '..', 'snakemake_wrapper', 'annotation
 
 CGI_LOCATION_FILE_TEMPLATE    = os.path.normpath(os.path.join(annotation_dir, 'cgi-locations-{}.csv.gz'))
 REPEAT_MASKER_FILE_TEMPLATE   = os.path.normpath(os.path.join(annotation_dir, 'repeat-masker-{}.csv.gz'))
-GTF_ANNOTATION_FILE_TEMPLATE  = os.path.normpath(os.path.join(annotation_dir, 'gencode.v34.{}.gtf.gz'))
+GTF_ANNOTATION_FILE_TEMPLATE  = os.path.normpath(os.path.join(annotation_dir, 'genes.{}.gtf.gz'))
 
 ANNOTATION_DOWNLOAD_LINKS_FILE = os.path.join(script_dir, 'annotation_download_links.yaml')
 DEFAULT_OPTIONALS_FILE = os.path.join(script_dir, 'optionals.yaml')

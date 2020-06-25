@@ -11,7 +11,7 @@ def main():
 
 @main.command(help='Create a config YAML file for running the Snakemake pipeline. Sample names are either passed as comma seperated lists or are read from text files if --use-sample-files parameter is set. Annotation files are automatically downloaded if necessary.')
 @click.option('--use-sample-files', is_flag=True, default=False, help='Load sample names from text files instead of passing them as a comma-seperated list.')
-@click.option('--genome_build', type=click.Choice(['hg19','hg38', 'None']), default='hg38', help='Build of the reference used for annotation.')
+@click.option('--genome_build', type=click.Choice(['hg19','hg38', 'mmul10', 'None']), default='hg38', help='Build of the reference used for annotation.')
 @click.option('--cores-per-job', default=1, help='The number of cores to use per job.')
 @click.argument('fastq_dir')
 @click.argument('reference_fasta')
@@ -37,7 +37,7 @@ def run_snakemake_from_config(dry_run, cores, config_yaml):
 @click.option('--dry-run', is_flag=True, default=False, help='Only dry-run the pipeline.')
 @click.option('--use-sample-files', is_flag=True, default=False, help='Load sample names from text files instead of passing them as a comma-seperated list.')
 @click.option('--cores', default=1, help='The number of cores to use for running the pipeline.')
-@click.option('--genome_build', type=click.Choice(['hg19','hg38']), default='hg38', help='Build of the reference used for annotation.')
+@click.option('--genome_build', type=click.Choice(['hg19','hg38', 'mmul10']), default='hg38', help='Build of the reference used for annotation.')
 @click.argument('fastq_dir')
 @click.argument('reference_fasta')
 @click.argument('group1')
