@@ -73,6 +73,21 @@ def get_default_optional_parameters():
         return default_optionals
 
 
+def get_methylseekr_calibration_chromosome(genome_build):
+
+    if genome_build is None:
+        print("[WARNING] Genome build not set. Make sure to set chromosome for MethylSeekR calibration accordingly with parameter 'methylseekr_pmd_chromosome' in config.")
+
+    options = {
+        'hg19': 'chr22',
+        'hg38': 'chr22',
+        'None': 'chr22',
+        'mmul10': 'chr20',
+    }
+
+    return options[genome_build]
+
+
 def get_default_config(fastq_dir, fasta_ref, group1, group2, genome_build, cores_per_job, output_dir):
 
     mandatory_parameters = {
@@ -90,10 +105,13 @@ def get_default_config(fastq_dir, fasta_ref, group1, group2, genome_build, cores
 
     reference_annotation_files = get_reference_annotation_files(genome_build)
 
+    methylseekr_calibration_chr = get_methylseekr_calibration_chromosome(genome_build)
+
     return {
         **mandatory_parameters,
         **optional_parameters,
-        **reference_annotation_files
+        **reference_annotation_files,
+        'methylseekr_pmd_chromosome': methylseekr_calibration_chr
     }
 
 
