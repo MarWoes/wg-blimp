@@ -104,6 +104,9 @@ annotation.annotateRegions <- function (regionTable, gzippedCgiFile, gzippedGTFF
     gtfRanges <- import(gzippedGTFFile)
     gtfMetaData <- values(gtfRanges)
 
+    noHgncNameIndices <- is.na(gtfRanges$gene_name)
+    gtfRanges$gene_name[noHgncNameIndices] <- gtfRanges$gene_id[noHgncNameIndices]
+
     biotypeColumn <- str_which(colnames(gtfMetaData), "gene_(bio)?type")
 
     gtfRanges <- gtfRanges[gtfMetaData[,biotypeColumn] %in% allowedBiotypes]
