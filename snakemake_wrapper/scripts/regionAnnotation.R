@@ -102,7 +102,11 @@ annotation.annotateRegions <- function (regionTable, gzippedCgiFile, gzippedGTFF
   if (annotation.isExistingFileOrNone(gzippedGTFFile)) {
 
     gtfRanges <- import(gzippedGTFFile)
-    gtfRanges <- gtfRanges[gtfRanges$gene_type %in% allowedBiotypes]
+    gtfMetaData <- values(gtfRanges)
+
+    biotypeColumn <- str_which(colnames(gtfMetaData), "gene_(bio)?type")
+
+    gtfRanges <- gtfRanges[gtfMetaData[,biotypeColumn] %in% allowedBiotypes]
     gtfRanges <- renameSeqlevels(gtfRanges, str_remove(seqlevels(gtfRanges), "^chr"))
 
     regionTable <- annotation.annotateGenes(regionTable, regionRanges, gtfRanges)
