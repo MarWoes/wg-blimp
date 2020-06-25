@@ -108,6 +108,11 @@ snakemake@source("regionAnnotation.R")
 ### SCRIPT
 
 fastaRef <- readDNAStringSet(fastaRefFile)
+
+# Remove description of sequence names according to FASTA format specification.
+# Achieved by cutting everything off that comes after the first whitespace
+names(fastaRef) <- sapply(str_split(names(fastaRef), "\\s"), `[`, 1)
+
 class(fastaRef) <- "BlimpDnaStringSet"
 
 if (is.null(cgiAnnotationFile) || !file.exists(cgiAnnotationFile)) {
