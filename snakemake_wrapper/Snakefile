@@ -182,9 +182,9 @@ rule picard_metrics:
         ref = ref_fasta,
         bam = alignment_dir + '/{sample}.bam'
     output:
-        alignment = qc_dir +'/picard-metrics/{sample}-alignment.txt',
-        insert    = qc_dir +'/picard-metrics/{sample}-insert-size.txt',
-        hist      = temp(qc_dir +'/picard-metrics/{sample}-hist.pdf')
+        alignment   = qc_dir +'/picard-metrics/{sample}-alignment.txt',
+        insert_size = qc_dir +'/picard-metrics/{sample}-insert-size.txt',
+        hist        = temp(qc_dir +'/picard-metrics/{sample}-hist.pdf')
     log:
         log_dir + '/{sample}.picard_metrics.log'
     benchmark:
@@ -192,7 +192,7 @@ rule picard_metrics:
     shell:
         """
         picard CollectAlignmentSummaryMetrics R={input.ref} I={input.bam} O={output.alignment} &> {log}
-        picard CollectInsertSizeMetrics I={input.bam} O={output.insert} H={output.hist} &> {log}
+        picard CollectInsertSizeMetrics I={input.bam} O={output.insert_size} H={output.hist} &> {log}
         """
 
 rule qualimap:
