@@ -30,12 +30,6 @@ ensurePackageInstallation <- function (packageName, type = "CRAN") {
 
 }
 
-loadOrInstall <- function (packageName, type = "CRAN") {
-
-  ensurePackageInstallation(packageName, type)
-
-  library(packageName, character.only = TRUE)
-}
 
 # install dependencies
 
@@ -44,7 +38,8 @@ cranPackages <- c(
   "KernSmooth",
   "parallel",
   "ggplot2",
-  "stringr"
+  "stringr",
+  "shiny"
 )
 
 biocPackages <- c(
@@ -55,15 +50,19 @@ biocPackages <- c(
   "rtracklayer"
 )
 
+
+
 for (package in cranPackages) {
-  loadOrInstall(package)
+  ensurePackageInstallation(package)
 }
 
 for (package in biocPackages) {
-  loadOrInstall(package, type = "bioc")
+  ensurePackageInstallation(package, type = "bioc")
 }
 
-# prepare shiny app
-ensurePackageInstallation("shiny")
+for (package in c(cranPackages, biocPackages)) {
+  library(package, character.only = TRUE)
+}
+
 
 writeLines(capture.output(sessionInfo()), snakemake@output$r_session_info)
