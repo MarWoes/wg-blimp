@@ -7,7 +7,9 @@ script_dir = os.path.dirname(os.path.realpath(__file__))
 snakefile_location = os.path.join(script_dir,'..','snakemake_wrapper', 'Snakefile')
 
 
-def run_snakemake_from_config(dry_run, config_yaml, delete_all_output=False, cores=1):
+def run_snakemake_from_config(dry_run, config_yaml, cores, delete_all_output=False):
+
+    print("[INFO] Invoking Snakemake with config {} and {} cores.".format(config_yaml, cores))
 
     snakemake.snakemake(
         snakefile=snakefile_location,
@@ -28,9 +30,9 @@ def run_snakemake(dry_run, use_sample_files, cores, genome_build, fastq_dir, ref
 
     cli.config.create_config(use_sample_files, genome_build, cores, fastq_dir, reference_fasta, group1, group2, output_dir, yaml_config_file)
 
-    run_snakemake_from_config(dry_run, yaml_config_file, cores=cores)
+    run_snakemake_from_config(dry_run, yaml_config_file, cores)
 
 
 def delete_all_output(dry_run, config_yaml):
 
-    run_snakemake_from_config(dry_run, config_yaml, True)
+    run_snakemake_from_config(dry_run, config_yaml, 1, True)
