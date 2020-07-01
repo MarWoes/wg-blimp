@@ -33,8 +33,18 @@ shiny.wgbs.plotHistogram <- function(reactiveTableHandle, columnName, stat = "bi
 
   req(reactiveTableHandle())
 
-  ggplot(reactiveTableHandle(), aes_string(x = columnName)) +
-    geom_histogram(bins = 50, fill = "steelblue1", colour = "steelblue4", stat = stat)
+  if (columnName %in% colnames(reactiveTableHandle())) {
+
+    ggplot(reactiveTableHandle(), aes_string(x = columnName)) +
+      geom_histogram(bins = 50, fill = "steelblue1", colour = "steelblue4", stat = stat)
+
+  } else {
+
+    ggplot() + geom_blank()
+
+  }
+
+
 
 }
 
@@ -109,13 +119,22 @@ shinyServer(function(input, output, session) {
       input$cpgFilter[1] <= num_cpgs & num_cpgs <= input$cpgFilter[2] &
       input$diffFilter[1] <= abs(diff) & abs(diff) <= input$diffFilter[2] &
       input$lengthFilter[1] <= length & length <= input$lengthFilter[2] &
-      input$repeatFilter[1] <= num_repeats & num_repeats <= input$repeatFilter[2] &
       input$covFilter <= mean_cov &
       (is.na(qValue) | input$qFilter[1] <= qValue & qValue <= input$qFilter[2]) &
-      (is.null(input$geneFilter) | seq_len(nrow(selectedTable)) %in% grep(genePattern, paste(gene_name, promoter_name))) &
-      (is.null(input$toolFilter) | seq_len(nrow(selectedTable)) %in% grep(toolPattern, tool)) &
-      (!input$onlyCgiFilter | `cgi_overlap`)
+      (is.null(input$toolFilter) | seq_len(nrow(selectedTable)) %in% grep(toolPattern, tool))
     ]
+
+    if ("num_repeats" %in% colnames(selectedTable)) {
+      selectedTable <- selectedTable[input$repeatFilter[1] <= num_repeats & num_repeats <= input$repeatFilter[2]]
+    }
+
+    if (all(c("gene_name", "promoter_name") %in% colnames(selectedTable))) {
+      selectedTable <- selectedTable[(is.null(input$geneFilter) | seq_len(nrow(selectedTable)) %in% grep(genePattern, paste(gene_name, promoter_name)))]
+    }
+
+    if ("cgi_overlap" %in% colnames(selectedTable)) {
+      selectedTable <- selectedTable[(!input$onlyCgiFilter | `cgi_overlap`)]
+    }
 
     dmrTable(selectedTable)
   })
