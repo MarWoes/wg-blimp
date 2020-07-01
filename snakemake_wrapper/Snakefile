@@ -33,6 +33,8 @@ runtime_report = qc_dir + '/runtime.pdf'
 mbias_ob_reports = expand(mbias_dir + '/{sample}_OB.svg', sample = config['samples'])
 mbias_ot_reports = expand(mbias_dir + '/{sample}_OT.svg', sample = config['samples'])
 
+temp_dir = config['temp_dir']
+
 rule all:
     input:
         target_files +
@@ -148,8 +150,11 @@ rule mark_duplicates:
         log_dir + '/{sample}.mark_duplicates.log'
     benchmark:
         benchmark_dir + '/deduplication/{sample}.tsv'
+    params:
+        tmp_dir = temp_dir,
+        max_memory = config['java_memory_gb']
     shell:
-        'picard MarkDuplicates I={input} O={output.bam} M={output.metrics} &> {log}'
+        'picard -Xmx{params.max_memory}G MarkDuplicates I={input} O={output.bam} M={output.metrics} TMP_DIR={params.tmp_dir} &> {log}'
 
 
 rule index_bam:
@@ -189,10 +194,13 @@ rule picard_metrics:
         log_dir + '/{sample}.picard_metrics.log'
     benchmark:
         benchmark_dir + '/picard_metrics/{sample}.tsv'
+    params:
+        tmp_dir = temp_dir,
+        max_memory = config['java_memory_gb']
     shell:
         """
-        picard CollectAlignmentSummaryMetrics R={input.ref} I={input.bam} O={output.alignment} &> {log}
-        picard CollectInsertSizeMetrics I={input.bam} O={output.insert_size} H={output.hist} &> {log}
+        picard -Xmx{params.max_memory}G CollectAlignmentSummaryMetrics R={input.ref} I={input.bam} O={output.alignment} TMP_DIR={params.tmp_dir} &> {log}
+        picard -Xmx{params.max_memory}G CollectInsertSizeMetrics I={input.bam} O={output.insert_size} H={output.hist} TMP_DIR={params.tmp_dir} &> {log}
         """
 
 rule qualimap:
@@ -207,7 +215,7 @@ rule qualimap:
     benchmark:
         benchmark_dir + '/qualimap/{sample}.tsv'
     params:
-        memory = config['qualimap_memory_gb']
+        memory = config['java_memory_gb']
     shell:
         'qualimap bamqc -bam {input} -outdir $(dirname {output}) -nt {threads} --collect-overlap-pairs --skip-duplicated --java-mem-size={params.memory}G &> {log} '
 

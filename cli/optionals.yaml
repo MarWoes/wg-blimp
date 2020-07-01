@@ -29,10 +29,11 @@ annotation_allowed_biotypes: [
   'lncRNA',
   'miRNA'
 ]
+temp_dir: '/tmp/'
 methylation_rate_on_chromosomes: []
 methylseekr_fdr_cutoff: 5
 methylseekr_methylation_cutoff: 0.5
-qualimap_memory_gb:
+java_memory_gb:
   32
 bsseq_local_correct:
   FALSE
