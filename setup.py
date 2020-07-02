@@ -28,6 +28,7 @@ setuptools.setup(
             '*.R'
         ],
         'cli': [
+            'annotation_download_links.yaml',
             'optionals.yaml'
         ]
     },
