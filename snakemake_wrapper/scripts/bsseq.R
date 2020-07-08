@@ -6,6 +6,7 @@ if (exists("snakemake")) {
 }
 
 library(bsseq)
+library(BiocParallel)
 
 callDmrs <- function (methylDackelBedGraphFiles, sampleNames, group1Samples, group2Samples, threads, min_cpg, min_diff, localCorrect, rdatFile, csvFile, pdfFile) {
 
