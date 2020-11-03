@@ -22,6 +22,7 @@ setuptools.setup(
             'annotation/*',
             'scripts/*.R',
             'submodules/camel/**/*',
+            'envs/*.yaml',
             'Snakefile'
         ],
         'shiny': [
