@@ -5,6 +5,7 @@ if len(config) == 0:
     raise ValueError('config not set, make sure to run snakemake with config file')
 
 snakemake_dir = sys.path[0]
+conda_env_dir = snakemake_dir + '/envs'
 
 output_dir = config['output_dir']
 alignment_dir = output_dir + '/alignment'
@@ -43,22 +44,9 @@ rule all:
         mbias_ot_reports
 
 
-### R package installation
-
-rule install_r_packages:
-    output:
-        r_session_info = log_dir + '/r_session_info.log'
-    log:
-        log_dir + '/r_install.log'
-    script:
-        'scripts/packageManagement.R'
-
-
 ### ALIGNMENT
 
 rule find_fqs:
-    input:
-        r_installation = rules.install_r_packages.output
     output:
         first  = output_dir +'/raw/{sample}.first.txt',
         second = output_dir +'/raw/{sample}.second.txt'
@@ -71,6 +59,8 @@ rule find_fqs:
     log:
         log_dir + '/find_fqs/{sample}.log'
     priority: 10
+    conda:
+        conda_env_dir + '/r.yaml'
     script:
         'scripts/findFastqs.R'
 
@@ -89,6 +79,8 @@ rule bwameth_indexing:
         ]
     log:
         log_dir + '/bwameth_indexing.log'
+    conda:
+        conda_env_dir + '/bwameth.yaml'
     shell:
         """
         bwameth.py index {input} 2> {log}
@@ -117,6 +109,8 @@ rule bwameth_align:
         num_threads
     benchmark:
         benchmark_dir + '/alignment/{sample}.tsv'
+    conda:
+        conda_env_dir + '/bwameth.yaml'
     shell:
         """
         FQ1=$(cat {input.first} | tr '\n' ',')
@@ -136,6 +130,8 @@ rule sort_bam:
         num_threads
     benchmark:
         benchmark_dir + '/sorting/{sample}.tsv'
+    conda:
+        conda_env_dir + '/samtools.yaml'
     shell:
         'samtools sort -o {output} -@ {threads} {input} 2> {log}'
 
@@ -153,6 +149,8 @@ rule mark_duplicates:
     params:
         tmp_dir = temp_dir,
         max_memory = config['java_memory_gb']
+    conda:
+        conda_env_dir + '/picard.yaml'
     shell:
         'picard -Xmx{params.max_memory}G MarkDuplicates I={input} O={output.bam} M={output.metrics} TMP_DIR={params.tmp_dir} &> {log}'
 
@@ -164,6 +162,8 @@ rule index_bam:
         alignment_dir + '/{sample}.bai'
     benchmark:
         benchmark_dir + '/indexing/{sample}.tsv'
+    conda:
+        conda_env_dir + '/samtools.yaml'
     shell:
         'samtools index {input} {output}'
 
@@ -179,6 +179,8 @@ rule fastqc:
         log_dir + '/{sample}.fastqc.log'
     benchmark:
         benchmark_dir + '/fastqc/{sample}.tsv'
+    conda:
+        conda_env_dir + '/fastqc.yaml'
     shell:
         'fastqc -o $(dirname {output}) {input.bam} &> {log}'
 
@@ -197,6 +199,8 @@ rule picard_metrics:
     params:
         tmp_dir = temp_dir,
         max_memory = config['java_memory_gb']
+    conda:
+        conda_env_dir + '/picard.yaml'
     shell:
         """
         picard -Xmx{params.max_memory}G CollectAlignmentSummaryMetrics R={input.ref} I={input.bam} O={output.alignment} TMP_DIR={params.tmp_dir} &> {log}
@@ -216,6 +220,8 @@ rule qualimap:
         benchmark_dir + '/qualimap/{sample}.tsv'
     params:
         memory = config['java_memory_gb']
+    conda:
+        conda_env_dir + '/qualimap.yaml'
     shell:
         'qualimap bamqc -bam {input} -outdir $(dirname {output}) -nt {threads} --collect-overlap-pairs --skip-duplicated --java-mem-size={params.memory}G &> {log} '
 
@@ -232,6 +238,8 @@ rule mbias:
     output:
         mbias_ot = mbias_dir + '/{sample}_OT.svg',
         mbias_ob = mbias_dir + '/{sample}_OB.svg'
+    conda:
+        conda_env_dir + '/methyldackel.yaml'
     shell:
         'MethylDackel mbias {input.fasta_ref} {input.bam_file} {mbias_dir}/{wildcards.sample} &> {log}'
 
@@ -247,13 +255,14 @@ rule multiqc:
         log_dir + '/multiqc.log'
     benchmark:
         benchmark_dir + '/multiqc.tsv'
+    conda:
+        conda_env_dir + '/multiqc.yaml'
     shell:
         'multiqc -f -o {qc_dir} {qc_dir}/fastqc {qc_dir}/picard-metrics {qc_dir}/qualimap &> {log} '
 
 rule methylation_metrics:
     input:
-        bed_graphs = expand(methylation_dir + '/{sample}_CpG.bedGraph', sample = config['samples']),
-        r_installation = rules.install_r_packages.output
+        bed_graphs = expand(methylation_dir + '/{sample}_CpG.bedGraph', sample = config['samples'])
     output:
         methylation_metrics = qc_dir + '/methylation_metrics.csv'
     log:
@@ -262,6 +271,8 @@ rule methylation_metrics:
         methylation_rate_on_chromosomes = config['methylation_rate_on_chromosomes']
     benchmark:
         benchmark_dir + '/methylation_metrics.tsv'
+    conda:
+        conda_env_dir + '/r.yaml'
     script:
         'scripts/methylationMetrics.R'
 
@@ -279,19 +290,22 @@ rule methyl_dackel:
         methylation_dir = methylation_dir
     benchmark:
         benchmark_dir + '/methylation_calling/{sample}.tsv'
+    conda:
+        conda_env_dir + '/methyldackel.yaml'
     shell:
         'MethylDackel extract --mergeContext -o {params.methylation_dir}/{wildcards.sample} {input.ref} {input.bam}'
 
 rule bedgraph_to_methylation_ratio:
     input:
-        bedGraph = methylation_dir + '/{sample}_CpG.bedGraph',
-        r_installation = rules.install_r_packages.output
+        bedGraph = methylation_dir + '/{sample}_CpG.bedGraph'
     output:
         bedGraph = temp(methylation_dir + '/{sample}_CpG_ratio.bedGraph')
     log:
         log_dir + '/{sample}.bedgraph_to_methylation_ratio.log'
     benchmark:
         benchmark_dir + '/metilene/{sample}.transformation.tsv'
+    conda:
+        conda_env_dir + '/r.yaml'
     script:
         'scripts/transformBedGraph.R'
 
@@ -306,6 +320,8 @@ rule metilene_input:
         g2_header = ' '.join([ 'g2_' + s for s in config['group2']])
     benchmark:
         benchmark_dir + '/metilene/input.tsv'
+    conda:
+        conda_env_dir + '/metilene.yaml'
     shell:
         'bedtools unionbedg -filler NA -header -names {params.g1_header} {params.g2_header} -i {input} > {output}'
 
@@ -323,6 +339,8 @@ rule metilene:
         log_dir + '/metilene.log'
     benchmark:
         benchmark_dir + '/metilene/calling.tsv'
+    conda:
+        conda_env_dir + '/metilene.yaml'
     shell:
         'metilene -m {params.min_cpg} -d {params.min_diff} -t {threads} {input} > {output} 2> {log}'
 
@@ -373,8 +391,7 @@ rule camel_dmr:
 
 rule bsseq:
     input:
-        meth = expand(methylation_dir + '/{sample}_CpG.bedGraph', sample = config['samples']),
-        r_installation = rules.install_r_packages.output
+        meth = expand(methylation_dir + '/{sample}_CpG.bedGraph', sample = config['samples'])
     output:
         rdata = bsseq_dir + '/bsseq.Rdata',
         csv   = bsseq_dir + '/dmrs.csv',
@@ -387,6 +404,8 @@ rule bsseq:
         log_dir + '/bsseq.log'
     benchmark:
         benchmark_dir + '/bsseq/bsseq.tsv'
+    conda:
+        conda_env_dir + '/r.yaml'
     script:
         'scripts/bsseq.R'
 
@@ -398,7 +417,6 @@ def expected_tool_files():
 rule dmr_combination:
     input:
         **expected_tool_files(),
-        r_installation = rules.install_r_packages.output,
         fasta_index = ref_fasta + '.fai'
     output:
         csv = dmr_dir + '/combined-dmrs.csv',
@@ -407,6 +425,8 @@ rule dmr_combination:
         log_dir + '/dmr_combination.log'
     benchmark:
         benchmark_dir + '/dmr_annotation/combination.tsv'
+    conda:
+        conda_env_dir + '/r.yaml'
     script:
         'scripts/dmrCombination.R'
 
@@ -422,14 +442,15 @@ rule dmr_coverage:
     threads: config['computing_threads']
     benchmark:
         benchmark_dir + '/dmr_coverage/{sample}.tsv'
+    conda:
+        conda_env_dir + '/mosdepth.yaml'
     shell:
         'mosdepth --threads {threads} --no-per-base --mapq {params.min_mapq} --by {input.bed} $(dirname {output})/{wildcards.sample} {input.bam}'
 
 rule dmr_annotation:
     input:
         coverages = expand(dmr_dir + '/dmr-coverage/{sample}.regions.bed.gz', sample = config['samples']),
-        combined_dmrs = dmr_dir + '/combined-dmrs.csv',
-        r_installation = rules.install_r_packages.output
+        combined_dmrs = dmr_dir + '/combined-dmrs.csv'
     output:
         annotated_dmrs = dmr_dir + '/annotated-dmrs.csv'
     params:
@@ -442,6 +463,8 @@ rule dmr_annotation:
         log_dir + '/dmr_annotation.log'
     benchmark:
         benchmark_dir + '/dmr_annotation/annotation.tsv'
+    conda:
+        conda_env_dir + '/r.yaml'
     script:
         'scripts/dmrAnnotation.R'
 
@@ -450,8 +473,7 @@ rule dmr_annotation:
 rule methylseekr:
     input:
         ref = ref_fasta,
-        methylation_table = expand(methylation_dir + '/{sample}_CpG.bedGraph', sample = config['samples']),
-        r_installation = rules.install_r_packages.output
+        methylation_table = expand(methylation_dir + '/{sample}_CpG.bedGraph', sample = config['samples'])
     output:
         pmd_all = segmentation_dir + '/pmd-all.csv',
         umr_lmr_all = segmentation_dir + '/umr-lmr-all.csv',
@@ -477,6 +499,8 @@ rule methylseekr:
         benchmark_dir + '/methylseekr.tsv'
     threads:
         num_threads
+    conda:
+        conda_env_dir + '/r.yaml'
     script:
         'scripts/methylseekRSegmentation.R'
 
@@ -484,13 +508,14 @@ rule methylseekr:
 
 rule benchmark_plot:
     input:
-        target_files = target_files,
-        r_installation = rules.install_r_packages.output
+        target_files = target_files
     output:
         runtime_report = runtime_report
     params:
         benchmark_dir = benchmark_dir
     log:
         log_dir + '/benchmark.log'
+    conda:
+        conda_env_dir + '/r.yaml'
     script:
         'scripts/benchmarkPlot.R'

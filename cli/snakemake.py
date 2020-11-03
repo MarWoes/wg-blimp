@@ -17,7 +17,8 @@ def run_snakemake_from_config(dry_run, config_yaml, cores, delete_all_output=Fal
         dryrun=dry_run,
         cores=cores,
         printshellcmds=True,
-        delete_all_output=delete_all_output
+        delete_all_output=delete_all_output,
+        use_conda=True
     )
 
 

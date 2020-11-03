@@ -1,0 +1,15 @@
+channels:
+ - conda-forge
+ - bioconda
+dependencies:
+ - r-base
+ - r-data.table
+ - r-ggplot2
+ - r-kernsmooth
+ - r-stringr
+ - bioconductor-biocparallel
+ - bioconductor-biostrings
+ - bioconductor-bsseq
+ - bioconductor-genomicranges
+ - bioconductor-methylseekr
+ - bioconductor-rtracklayer
