@@ -39,7 +39,7 @@ def download_if_necessary(file_name):
 
 def get_reference_annotation_files(genome_build):
 
-    if genome_build is 'None':
+    if genome_build == 'None':
 
         print("[WARNING] Segmentation with MethylSeekR requires CGI annotation.")
         print("[WARNING] Set 'cgi_annotation_file' accordingly or remove 'segmentation/umr-lmr-all.csv' from 'target_files' in configuration file to prevent errors.")
