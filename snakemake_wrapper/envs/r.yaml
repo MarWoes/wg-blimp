@@ -3,6 +3,7 @@ channels:
  - bioconda
 dependencies:
  - r-base
+ - r-cairo
  - r-data.table
  - r-ggplot2
  - r-kernsmooth
