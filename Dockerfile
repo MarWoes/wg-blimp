@@ -1,6 +1,6 @@
 FROM continuumio/miniconda3:latest
 
-COPY wg-blimp-setup.sh /root/wg-blimp-setup.sh
+COPY install_in_docker.sh /root/wg-blimp-setup.sh
 
 COPY . /tmp/wg-blimp
 
