@@ -11,7 +11,7 @@ def run_snakemake_from_config(dry_run, config_yaml, cores, delete_all_output=Fal
 
     print("[INFO] Invoking Snakemake with config {} and {} cores.".format(config_yaml, cores))
 
-    snakemake.snakemake(
+    finished_successfully = snakemake.snakemake(
         snakefile=snakefile_location,
         configfiles=[config_yaml],
         dryrun=dry_run,
@@ -20,6 +20,9 @@ def run_snakemake_from_config(dry_run, config_yaml, cores, delete_all_output=Fal
         delete_all_output=delete_all_output,
         use_conda=True
     )
+
+    if not finished_successfully:
+        os.sys.exit(os.EX_SOFTWARE)
 
 
 def run_snakemake(dry_run, use_sample_files, cores, genome_build, fastq_dir, reference_fasta, group1, group2, output_dir):
