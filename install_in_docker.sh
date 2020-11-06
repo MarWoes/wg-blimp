@@ -21,8 +21,8 @@ conda config --add channels conda-forge
 conda install --yes --name base 'snakemake-minimal>=5.8' click ruamel.yaml r-base r-shiny r-shinydashboard r-data.table r-ggplot2 r-htmlwidgets r-dt r-httpuv h5py pysam
 conda clean --all --yes
 
-cd /tmp/wg-blimp
-conda run pip install .
+git clone --recursive https://github.com/MarWoes/wg-blimp /root/wg-blimp
+conda run pip install /root/wg-blimp
 
 cd $TEST_DIR
 conda run wg-blimp create-config --cores-per-job 16 fastq chr22.fasta blood1,blood2 sperm1,sperm2 results config.yaml
