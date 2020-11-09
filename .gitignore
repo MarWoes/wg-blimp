@@ -1,4 +1,5 @@
 snakemake_wrapper/.snakemake
+snakemake_wrapper/conda
 *.Rdata
 *.RData
 cli/__pycache__/

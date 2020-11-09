@@ -22,12 +22,12 @@ conda install --yes --name base 'snakemake-minimal>=5.8' click ruamel.yaml r-bas
 conda clean --all --yes
 
 git clone --recursive https://github.com/MarWoes/wg-blimp /root/wg-blimp
-conda run pip install /root/wg-blimp
+pip install /root/wg-blimp
 
 cd $TEST_DIR
-conda run wg-blimp create-config --cores-per-job 16 fastq chr22.fasta blood1,blood2 sperm1,sperm2 results config.yaml
-conda run wg-blimp run-snakemake-from-config --cores=64 --dry-run config.yaml
-conda run wg-blimp run-snakemake-from-config --cores=64 config.yaml
+wg-blimp create-config --cores-per-job 4 fastq chr22.fasta blood1,blood2 sperm1,sperm2 results config.yaml
+wg-blimp run-snakemake-from-config --cores=16 --dry-run config.yaml
+wg-blimp run-snakemake-from-config --cores=16 config.yaml
 
 cd /
 rm -rf $TEST_DIR
