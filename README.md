@@ -13,19 +13,19 @@ To run `wg-blimp` you need a UNIX environment that contains a [Bioconda](http://
 It is advised to install `wg-blimp` through Bioconda. It is also recommended to install `wg-blimp` in a fresh environment, as it has many dependencies that may conflict with other packages, for this you can use:
 
 ```
-conda create -n wg-blimp wg-blimp python=3.6.7 r-base=4.0.2 methyldackel==0.4.0
+conda create -n wg-blimp wg-blimp
 ```
 
 ### Docker
 
 We bundled a full `wg-blimp` installation into a Docker container. You may pull our image using
 ```
-docker pull imimarw/wg-blimp:v0.9.6
+docker pull imimarw/wg-blimp:v0.9.7
 ```
 
 Once the image was downloaded and extracted, you can start the docker container with
 ```
-docker run -it -v <directory-to-be-mounted>:<mounted-directory-in-container> imimarw/wg-blimp:v0.9.6
+docker run -it -v <directory-to-be-mounted>:<mounted-directory-in-container> imimarw/wg-blimp:v0.9.7
 ```
 
 ### From source
