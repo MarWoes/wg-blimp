@@ -1,5 +1,15 @@
+image: docker:19.03.12
+
 variables:
+  GIT_STRATEGY: "clone"
   GIT_SUBMODULE_STRATEGY: "normal"
+  DOCKER_TLS_CERTDIR: "/certs"
+
+services:
+  - docker:19.03.12-dind
+
+before_script:
+  - docker info
 
 build-wg-blimp:
   script:
@@ -8,3 +18,15 @@ build-wg-blimp:
     paths:
       - '*.tar.gz'
     expire_in: 1 month
+  only:
+    - pushes
+    - web
+
+nightly-test:
+  script:
+    - docker build --no-cache -t marw/wg-blimp-debug .
+  only:
+    - schedules
+    - web
+  retry: 2
+  timeout: 3 hours
