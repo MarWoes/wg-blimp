@@ -18,7 +18,7 @@ unzip download
 conda config --add channels defaults
 conda config --add channels bioconda
 conda config --add channels conda-forge
-conda install --yes --name base wg-blimp
+conda install --yes --name base wg-blimp r-base==4.0.3
 #conda install --yes --name base 'snakemake-minimal>=5.8' click ruamel.yaml r-base r-shiny r-shinydashboard r-data.table r-ggplot2 r-htmlwidgets r-dt r-httpuv h5py pysam
 conda clean --all --yes
 
