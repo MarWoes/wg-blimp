@@ -81,6 +81,17 @@ sample2,/my/path/sample2_L1_1.fq.gz,/my/path/sample2_L1_2.fq.gz
 sample3,/my/path/sample3_L1_1.fq.gz,/my/path/sample3_L1_2.fq.gz
 ```
 
+### Cluster mode
+
+You can use `wg-blimp` on HPC infrastructure using Snakemake's cluster mode by setting the options `--cluster` and `--nodes`.
+The command specified by `--cluster` will be used for rule execution by Snakemake
+Please note that cluster usage strongly depends on local infrastructure and operating systems, thus requiring users to determine adequate parameters for cluster mode.
+An example of `wg-blimp` within a SLURM environment could look as follows:
+
+```
+wg-blimp run-snakemake-from-config --cores 32 --nodes 2 --cluster "sbatch --partition normal --nodes=1 --ntasks-per-node 32 --time 01:00:00" config.yaml
+```
+
 ### Shiny GUI
 
 You can use the command `wg-blimp run-shiny` to load one or more project config files into a shiny GUI for easier access.
