@@ -20,12 +20,12 @@ conda create -n wg-blimp wg-blimp r-base==4.0.3
 
 We bundled a full `wg-blimp` installation into a Docker container. You may pull our image using
 ```
-docker pull imimarw/wg-blimp:v0.9.7
+docker pull imimarw/wg-blimp:v0.9.8
 ```
 
 Once the image was downloaded and extracted, you can start the docker container with
 ```
-docker run -it -v <directory-to-be-mounted>:<mounted-directory-in-container> imimarw/wg-blimp:v0.9.7
+docker run -it -v <directory-to-be-mounted>:<mounted-directory-in-container> imimarw/wg-blimp:v0.9.8
 ```
 
 ### From source
