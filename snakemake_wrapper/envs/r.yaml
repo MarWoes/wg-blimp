@@ -14,3 +14,4 @@ dependencies:
  - bioconductor-genomicranges
  - bioconductor-methylseekr
  - bioconductor-rtracklayer
+ - openssl==1.1.1l
