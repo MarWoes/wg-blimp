@@ -1,0 +1,126 @@
+This is a set up file for the WGBS pipeline which can be found at
+https://bmcbioinformatics.biomedcentral.com/articles/10.1186/s12859-020-3470-5 
+https://github.com/MarWoes/wg-blimp 
+https://github.com/MarWoes/wg-blimp/wiki/Tutorial
+
+#Get the files
+https://uni-muenster.sciebo.de/s/7vpqRSEATYcvlnP
+#If you go to this link you can see the directions tell you to download the files into a .zip file and give you a direct link to the donwload folder to download these from the command line ue this command 
+$ wget https://uni-muenster.sciebo.de/s/7vpqRSEATYcvlnP/download -O subsampled-blood-sperm.zip
+$ unzip subsampled-blood-sperm.zip
+
+#Set up anaconda enviroment for the pipeline
+#Install Anaconda
+
+$ sudo apt-get update
+$ sudo apt-get install curl
+
+#Here is the address of the installer for Anaconda
+https://repo.anaconda.com/archive/Anaconda3-2021.05-Linux-x86_64.sh
+#cd to the /tmp folder and use the curl command to install the bash .sh file
+
+$ cd /tmp
+$ curl -O https://repo.anaconda.com/archive/Anaconda3-2021.05-Linux-x86_64.sh
+
+#Check the downloaded file before you run it
+
+$ sha256sum Anaconda3–2021.05–Linux–x86_64.sh
+
+#The output better match this found at https://repo.anaconda.com/archive/ 
+
+25e3ebae8905450ddac0f5c93f89c467
+
+#Run the file 
+
+$bash Anaconda3-2021.05-Linux-x86_64.sh
+
+#Add anaconda to your path
+
+$cp -sr ~/anaconda3/bin /usr/local/bin/anaconda3
+$cp -s ~/anaconda3/bin/conda /usr/local/bin/
+
+#close the bash shell and reopen it for the changes to work if it worked when you reopen the shell it should have (base) in front of your shell name
+#Set up conda environment from the github environment.yml file
+
+$conda env create --file environment.yml
+$conda activate wg-blimp
+
+#Install wg-blimp
+
+$python setup.py install
+
+#Check that the workflow is working
+
+$wg-blimp run-snakemake --help
+
+#Test everything using the sample files provided
+
+$wg-blimp run-snakemake --cores=8 fastq/ chr22.fasta blood1,blood2 sperm1,sperm2 results --dry-run
+
+#Adding the --dry-run flag to the command will check that all of the files are set up in the right loaction but will not do anything else to run the full workflow run the same thing without the --dry-run flag
+
+$wg-blimp run-snakemake --cores=8 fastq/ chr22.fasta blood1,blood2 sperm1,sperm2 results 
+
+# Access the shiny server 
+# Background Shiny servers are web applications run on R that allow you to run apps in a controlled enviroment. As soon as you leave the app the app stops running making them great to portability between networks and institutions that are doing this kind of work.
+
+#To install shiny app make sure that you have R installed
+
+R --version
+
+#If you don't have R installed. install it now.
+
+$sudo apt-get install r-base
+
+# Once you have R installed open an interactive session and install the shiny package
+
+R
+> install.packages('shiny', repos='https://cran.rstudio.com/')
+> q()
+
+# Once you exit R you can install gdebi (which is used to install Shiny Server and all the dependencies)
+
+$sudo apt-get install gdebi-core
+$wget https://download3.rstudio.org/ubuntu-14.04/x86_64/shiny-server-1.5.17.973-amd64.deb
+$sudo gdebi shiny-server-1.5.17.973-amd64.deb
+
+#Remember you can check that the wget command was correct by running 
+$sha256 shiny-server-1.5.17.973-amd64.deb
+
+#The output better match this
+80f1e48f6c824be7ef9c843bb7911d4981ac7e8a963e0eff823936a8b28476ee
+
+#Now run the shiny server wrapper 
+wg-blimp run-shiny results/config.yaml
+
+#The output of the wrapper will listen to port 0.0.0.0:9898 but on your computer try using 127.0.0.1:9898 to get it to display in a browser.
+
+#If you get some error messages saying you don't have the packages just open an interactive R session, download the package that is missing, and try again. 
+install.packages('shinydashboard', 'data.table', 'htmlwidgets', 'DT')
+#Good Luck
+# Okay so this is is how your process your own samples. 
+# You need to start off by downloading a refrence genome.
+
+$ wget ftp://ftp.ebi.ac.uk/pub/databases/gencode/Gencode_mouse/release_M18/GRCm38.primary_assembly.genome.fa.gz
+
+#unzip the gzipped file
+$ gzip -d GRCm38.fa.gz
+
+#Get an annotation of the refrence genome as well also from Gencode
+$ wget ftp://ftp.ebi.ac.uk/pub/databases/gencode/Gencode_mouse/release_M18/gencode.vM27.annotation.gtf.gz
+
+# Now you will need to download three files the UCSC table viewer, a file that indicates all the locations of the CpG in the genome, a file that indicates the loaction of all of the repeat elements in the genome, and a file that indicates the location of all of the transcription start sites in the genome.
+# Go to these three links and download the .csv files compressed and gzipped so the end of each file will look like .csv.gz
+
+https://genome.ucsc.edu/cgi-bin/hgTables?hgsid=1219084465_HRDjHL1J6LoO4NKjTqqdzM3L9RS0&clade=mammal&org=Mouse&db=mm39&hgta_group=allTracks&hgta_track=cpgIslandExt&hgta_table=0&hgta_regionType=genome&position=chr12%3A56%2C741%2C761-56%2C761%2C390&hgta_outputType=primaryTable&hgta_outFileName=cpi-GRCm38.csv
+
+https://genome.ucsc.edu/cgi-bin/hgTables?hgsid=1219084465_HRDjHL1J6LoO4NKjTqqdzM3L9RS0&clade=mammal&org=Mouse&db=mm39&hgta_group=allTracks&hgta_track=rmsk&hgta_table=0&hgta_regionType=genome&position=chr12%3A56%2C741%2C761-56%2C761%2C390&hgta_outputType=primaryTable&hgta_outFileName=rptmsk-GRCm38.csv
+
+https://genome.ucsc.edu/cgi-bin/hgTables?hgsid=1219084465_HRDjHL1J6LoO4NKjTqqdzM3L9RS0&clade=mammal&org=Mouse&db=mm39&hgta_group=genes&hgta_track=wgEncodeGencodeVM27&hgta_table=0&hgta_regionType=genome&position=chr12%3A56%2C741%2C761-56%2C761%2C390&hgta_outputType=primaryTable&hgta_outFileName=tss-GRCm38.csv
+
+#Now you need to set up the config file. Use the template I left in the git hub directory and use the same naming conventions for each of the files and sample files as well
+#once you have that all set up you can run the snakemake file from the config file you just set up using this command.
+ 
+$ wg-blimp run-snakemake-from-config --cores=8 wgbs3-config.yaml
+
+#So far this looks like it will take more than 12 hours to run so be patient and request at least 8 nodes.
