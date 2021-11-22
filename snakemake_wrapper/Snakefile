@@ -152,7 +152,7 @@ rule mark_duplicates:
     conda:
         conda_env_dir + '/picard.yaml'
     shell:
-        'picard -Xmx{params.max_memory}G MarkDuplicates I={input} O={output.bam} M={output.metrics} TMP_DIR={params.tmp_dir} &> {log}'
+        'picard -Xmx{params.max_memory}G MarkDuplicates -I {input} -O {output.bam} -M {output.metrics} -TMP_DIR {params.tmp_dir} &> {log}'
 
 
 rule index_bam:
@@ -203,8 +203,8 @@ rule picard_metrics:
         conda_env_dir + '/picard.yaml'
     shell:
         """
-        picard -Xmx{params.max_memory}G CollectAlignmentSummaryMetrics R={input.ref} I={input.bam} O={output.alignment} TMP_DIR={params.tmp_dir} &> {log}
-        picard -Xmx{params.max_memory}G CollectInsertSizeMetrics I={input.bam} O={output.insert_size} H={output.hist} TMP_DIR={params.tmp_dir} &> {log}
+        picard -Xmx{params.max_memory}G CollectAlignmentSummaryMetrics -R {input.ref} -I {input.bam} -O {output.alignment} -TMP_DIR {params.tmp_dir} &> {log}
+        picard -Xmx{params.max_memory}G CollectInsertSizeMetrics -I {input.bam} -O {output.insert_size} -H {output.hist} -TMP_DIR {params.tmp_dir} &> {log}
         """
 
 rule qualimap:
