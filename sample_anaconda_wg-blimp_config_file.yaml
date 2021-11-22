@@ -1,0 +1,48 @@
+annotation_allowed_biotypes:
+- protein_coding
+- lncRNA
+- miRNA
+annotation_min_mapq: 10
+bsseq_local_correct: false
+cgi_annotation_file: /home/shame/wgbs/fastq/cgi-GRCm39.csv.gz
+computing_threads: 40
+dmr_tools:
+- metilene
+group1:
+- ES_L001_R1
+- ES_L001_R2
+group2:
+- TF_L001_R1
+- TF_L001_R2
+gtf_annotation_file: /home/shame/wgbs/fastq/gencode.vM27.annotation.gtf.gz
+io_threads: 8
+java_memory_gb: 32
+methylation_rate_on_chromosomes: []
+methylseekr_fdr_cutoff: 5
+methylseekr_methylation_cutoff: 0.5
+methylseekr_pmd_chromosome: chr19
+min_cov: 5
+min_cpg: 5
+min_diff: 0.3
+output_dir: /home/shame/wgbs/results5
+promoter_tss_distances:
+- -1000
+- 1000
+rawdir: /mnt/c/Users/jakel/Documents/UTSA/Lab/Coding/WGBS/1000
+rawsuffixregex:
+  first: (_001)\.(fastq|fq)(\.gz)?
+  second: (_002)\.(fastq|fq)(\.gz)?
+ref: /home/shame/wgbs/fastq/GRCm39.genome.fa
+repeat_masker_annotation_file: /home/shame/wgbs/fastq/rptmsk-GRCm39.csv.gz
+sample_fastq_csv: null
+samples:
+- TF_L001_R2
+- ES_L001_R1
+- ES_L001_R2
+- TF_L001_R1
+target_files:
+- dmr/annotated-dmrs.csv
+- qc/multiqc_report.html
+- qc/methylation_metrics.csv
+- segmentation/umr-lmr-all.csv
+temp_dir: /tmp/
