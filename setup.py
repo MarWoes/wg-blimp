@@ -5,7 +5,7 @@ import setuptools
 
 setuptools.setup(
     name='wg-blimp',
-    version='0.9.9',
+    version='0.9.10',
     author='Marius Woeste',
     author_email='mar.w@wwu.de',
     description='WGBS methylation analysis pipeline',
