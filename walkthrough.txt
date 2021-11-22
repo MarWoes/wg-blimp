@@ -148,6 +148,10 @@ https://genome.ucsc.edu/cgi-bin/hgTables?hgsid=1219084465_HRDjHL1J6LoO4NKjTqqdzM
 
 https://genome.ucsc.edu/cgi-bin/hgTables?hgsid=1219084465_HRDjHL1J6LoO4NKjTqqdzM3L9RS0&clade=mammal&org=Mouse&db=mm39&hgta_group=genes&hgta_track=wgEncodeGencodeVM27&hgta_table=0&hgta_regionType=genome&position=chr12%3A56%2C741%2C761-56%2C761%2C390&hgta_outputType=primaryTable&hgta_outFileName=tss-GRCm38.csv
 
+# If you are using the docker container you will also have to download an additional USCS file that indicates all the known genes and the TSS for each which can be found here.
+
+https://genome.ucsc.edu/cgi-bin/hgTables?hgsid=1219084465_HRDjHL1J6LoO4NKjTqqdzM3L9RS0&clade=mammal&org=Mouse&db=mm39&hgta_group=genes&hgta_track=wgEncodeGencodeVM27&hgta_table=0&hgta_regionType=genome&position=chr12%3A56%2C741%2C761-56%2C761%2C390&hgta_outputType=primaryTable&hgta_outFileName=tss-GRCm38.csv
+
 # Now you need to set up the config file. Use the template I left in the git hub directory and use the same naming conventions for each of the files and sample files as well
 # The config file will differe if you are using pipeline either installed using the anaconda env or the docker container. I'm hoping to have that unified in the near future. For the mean time, I will upload examples of both.
 # Once you have that all set up you can run the snakemake file from the config file you just set up using this command.
