@@ -139,16 +139,12 @@ $ gzip -d GRCm38.fa.gz
 #Get an annotation of the refrence genome as well also from Gencode
 $ wget ftp://ftp.ebi.ac.uk/pub/databases/gencode/Gencode_mouse/release_M18/gencode.vM27.annotation.gtf.gz
 
-# Now you will need to download three files the UCSC table viewer, a file that indicates all the locations of the CpG in the genome, a file that indicates the loaction of all of the repeat elements in the genome, and a file that indicates the location of all of the transcription start sites in the genome.
+# Now you will need to download three files the UCSC table viewer, a file that indicates all the locations of the CpG in the genome, a file that indicates the location of all of the repeat elements in the genome, and (if you are using the docker container method you will need this additional third file) a file that indicates the location of all of the transcription start sites in the genome.
 # Go to these three links and download the .csv files compressed and gzipped so the end of each file will look like .csv.gz
 
 https://genome.ucsc.edu/cgi-bin/hgTables?hgsid=1219084465_HRDjHL1J6LoO4NKjTqqdzM3L9RS0&clade=mammal&org=Mouse&db=mm39&hgta_group=allTracks&hgta_track=cpgIslandExt&hgta_table=0&hgta_regionType=genome&position=chr12%3A56%2C741%2C761-56%2C761%2C390&hgta_outputType=primaryTable&hgta_outFileName=cpi-GRCm38.csv
 
 https://genome.ucsc.edu/cgi-bin/hgTables?hgsid=1219084465_HRDjHL1J6LoO4NKjTqqdzM3L9RS0&clade=mammal&org=Mouse&db=mm39&hgta_group=allTracks&hgta_track=rmsk&hgta_table=0&hgta_regionType=genome&position=chr12%3A56%2C741%2C761-56%2C761%2C390&hgta_outputType=primaryTable&hgta_outFileName=rptmsk-GRCm38.csv
-
-https://genome.ucsc.edu/cgi-bin/hgTables?hgsid=1219084465_HRDjHL1J6LoO4NKjTqqdzM3L9RS0&clade=mammal&org=Mouse&db=mm39&hgta_group=genes&hgta_track=wgEncodeGencodeVM27&hgta_table=0&hgta_regionType=genome&position=chr12%3A56%2C741%2C761-56%2C761%2C390&hgta_outputType=primaryTable&hgta_outFileName=tss-GRCm38.csv
-
-# If you are using the docker container you will also have to download an additional USCS file that indicates all the known genes and the TSS for each which can be found here.
 
 https://genome.ucsc.edu/cgi-bin/hgTables?hgsid=1219084465_HRDjHL1J6LoO4NKjTqqdzM3L9RS0&clade=mammal&org=Mouse&db=mm39&hgta_group=genes&hgta_track=wgEncodeGencodeVM27&hgta_table=0&hgta_regionType=genome&position=chr12%3A56%2C741%2C761-56%2C761%2C390&hgta_outputType=primaryTable&hgta_outFileName=tss-GRCm38.csv
 
