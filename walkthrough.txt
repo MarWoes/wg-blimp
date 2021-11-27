@@ -69,7 +69,7 @@ $ srun --x11 -p compute1 -n 8 -N 8 -t 72:00:00 --pty bash
 # Install the docker container using singularity
 
  $ module load singularity
- $ singularity pull docker://blancojake/wg-blimp
+ $ singularity pull docker://blancojake/wg-blimp:utsa
 
  # Singularity will install the conatiner inside a .sif file. You can start the docker container as if you were running an exicutible file from the terminal in the directory that the .sif file was created in.
 
