@@ -81,11 +81,11 @@ $ srun --x11 -p compute1 -n 8 -N 8 -t 72:00:00 --pty bash
 
 #Check that the workflow is working
 
-$wg-blimp run-snakemake --help
+$ wg-blimp run-snakemake --help
 
 #Test everything using the sample files provided
 
-$wg-blimp run-snakemake --cores=8 fastq/ chr22.fasta blood1,blood2 sperm1,sperm2 results --dry-run
+$ wg-blimp run-snakemake --cores=8 fastq/ chr22.fasta blood1,blood2 sperm1,sperm2 results --dry-run
 
 #Adding the --dry-run flag to the command will check that all of the files are set up in the right loaction but will not do anything else to run the full workflow run the same thing without the --dry-run flag
 
@@ -110,9 +110,9 @@ R
 
 # Once you exit R you can install gdebi (which is used to install Shiny Server and all the dependencies)
 
-$sudo apt-get install gdebi-core
-$wget https://download3.rstudio.org/ubuntu-14.04/x86_64/shiny-server-1.5.17.973-amd64.deb
-$sudo gdebi shiny-server-1.5.17.973-amd64.deb
+$ sudo apt-get install gdebi-core
+$ wget https://download3.rstudio.org/ubuntu-14.04/x86_64/shiny-server-1.5.17.973-amd64.deb
+$ sudo gdebi shiny-server-1.5.17.973-amd64.deb
 
 #Remember you can check that the wget command was correct by running
 $sha256 shiny-server-1.5.17.973-amd64.deb
@@ -126,18 +126,19 @@ wg-blimp run-shiny results/config.yaml
 #The output of the wrapper will listen to port 0.0.0.0:9898 but on your computer try using 127.0.0.1:9898 to get it to display in a browser.
 
 #If you get some error messages saying you don't have the packages just open an interactive R session, download the package that is missing, and try again.
-install.packages('shinydashboard', 'data.table', 'htmlwidgets', 'DT')
+install.packages(c('shinydashboard', 'data.table', 'htmlwidgets', 'DT'))
 #Good Luck
 # Okay so this is is how your process your own samples.
 # You need to start off by downloading a refrence genome.
 
-$ wget ftp://ftp.ebi.ac.uk/pub/databases/gencode/Gencode_mouse/release_M18/GRCm38.primary_assembly.genome.fa.gz
+$ wget http://ftp.ebi.ac.uk/pub/databases/gencode/Gencode_mouse/latest_release/GRCm39.genome.fa.gz
+
 
 #unzip the gzipped file
-$ gzip -d GRCm38.fa.gz
+$ gzip -d GRCm39.fa.gz
 
 #Get an annotation of the refrence genome as well also from Gencode
-$ wget ftp://ftp.ebi.ac.uk/pub/databases/gencode/Gencode_mouse/release_M18/gencode.vM27.annotation.gtf.gz
+$ wget ftp://ftp.ebi.ac.uk/pub/databases/gencode/Gencode_mouse/latest_release/gencode.vM27.annotation.gtf.gz
 
 # Now you will need to download three files the UCSC table viewer, a file that indicates all the locations of the CpG in the genome, a file that indicates the location of all of the repeat elements in the genome, and (if you are using the docker container method you will need this additional third file) a file that indicates the location of all of the transcription start sites in the genome.
 # Go to these three links and download the .csv files compressed and gzipped so the end of each file will look like .csv.gz
