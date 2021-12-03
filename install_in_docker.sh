@@ -23,13 +23,13 @@ conda install --yes --name base wg-blimp r-base==4.1.1
 #conda install --yes --name base click h5py pysam r-base==4.1.1 r-data.table r-dt r-ggplot2 r-htmlwidgets r-httpuv r-shiny r-shinydashboard ruamel.yaml 'snakemake-minimal>=5.8' mamba==0.17.0
 conda clean --all --yes
 
-#git clone --recursive https://github.com/MarWoes/wg-blimp /root/wg-blimp
+#git clone --recursive https://github.com/JakeLehle/wg-blimp.git /root/wg-blimp
 #pip install /root/wg-blimp
 
 cd $TEST_DIR
-wg-blimp create-config --cores-per-job 4 fastq chr22.fasta blood1,blood2 sperm1,sperm2 results config.yaml
-wg-blimp run-snakemake-from-config --cores=4 --dry-run config.yaml
-wg-blimp run-snakemake-from-config --cores=4 config.yaml
+wg-blimp create-config --cores-per-job 8 fastq chr22.fasta blood1,blood2 sperm1,sperm2 results config.yaml
+wg-blimp run-snakemake-from-config --cores=8 --dry-run config.yaml
+wg-blimp run-snakemake-from-config --cores=8 config.yaml
 
 cd /
 rm -rf $TEST_DIR
