@@ -25,7 +25,7 @@ benchmarkReports <- lapply(benchmarkFiles, function (file) {
   return(benchmarkReport)
 })
 
-fullBenchmarkReport <- rbindlist(benchmarkReports)
+fullBenchmarkReport <- rbindlist(benchmarkReports, fill = TRUE)
 
 pdf(targetPlot)
 
