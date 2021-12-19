@@ -32,7 +32,7 @@ $ curl -O https://repo.anaconda.com/archive/Anaconda3-2021.05-Linux-x86_64.sh
 
 #Check the downloaded file before you run it
 
-$ sha256sum Anaconda3–2021.05–Linux–x86_64.sh
+$ md5sum Anaconda3–2021.05–Linux–x86_64.sh
 
 #The output better match this found at https://repo.anaconda.com/archive/
 
