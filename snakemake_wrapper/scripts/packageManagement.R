@@ -37,8 +37,7 @@ cranPackages <- c(
   "data.table",
   "KernSmooth",
   "parallel",
-  "ggplot2",
-  "stringr",
+  "tidyverse",
   "shiny"
 )
 

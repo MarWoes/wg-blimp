@@ -1,7 +1,7 @@
 library(data.table)
 library(GenomicRanges)
 library(rtracklayer)
-library(stringr)
+library(tidyverse)
 
 annotation.isExistingFileOrNone <- function (fileName) {
 
