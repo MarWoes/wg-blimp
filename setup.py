@@ -5,8 +5,8 @@ import setuptools
 
 setuptools.setup(
     name='wg-blimp',
-    version='0.9.10',
-    author='Marius Woeste',
+    version='0.10.0',
+    author='Marius Woeste and modified by Jake Lehle',
     author_email='mar.w@wwu.de',
     description='WGBS methylation analysis pipeline',
     packages=[
@@ -21,6 +21,7 @@ setuptools.setup(
         'snakemake_wrapper': [
             'annotation/*',
             'scripts/*.R',
+            'scripts/*.sh',
             'submodules/camel/**/*',
             'envs/*.yaml',
             'Snakefile'

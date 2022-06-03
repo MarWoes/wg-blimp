@@ -4,8 +4,7 @@ channels:
   - bioconda
 dependencies:
   - bedtools
-  - bwa
-  - bwameth 0.2.0
+  - gembs
   - click
   - fastqc
   - git

@@ -7,7 +7,7 @@ if (exists("snakemake")) {
 
 library(GenomicRanges)
 library(data.table)
-library(stringr)
+library(tidyverse)
 
 wgbs.rangesFromData <- function (chr, start, end, num_cpgs, diff, tool, qValues) {
 
