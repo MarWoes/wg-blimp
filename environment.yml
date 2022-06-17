@@ -4,7 +4,9 @@ channels:
   - bioconda
 dependencies:
   - bedtools
-  - gembs
+  - gembs 3.5.5_IHEC
+  - bwa
+  - bwameth
   - click
   - fastqc
   - git
@@ -18,5 +20,5 @@ dependencies:
   - qualimap
   - r-base
   - ruamel.yaml
-  - samtools
+  - samtools >=1.15
   - snakemake-minimal >=5.8

@@ -9,6 +9,7 @@ conda_env_dir = snakemake_dir + '/envs'
 
 output_dir = config['output_dir']
 raw_dir = config['rawdir']
+aligner = config['aligner']
 alignment_dir = output_dir + '/alignment'
 log_dir = output_dir + '/logs'
 benchmark_dir = log_dir + '/benchmarks'
@@ -29,140 +30,264 @@ ref_fasta = config['ref']
 num_threads = config['computing_threads']
 io_threads = config['io_threads']
 
-target_files = [ output_dir + '/' + outfile for outfile in config['target_files']]
-csv_reports = expand(alignment_dir + '/{sample}.csv', sample = config['samples'])
-runtime_report = qc_dir + '/runtime.pdf'
-gemBSconf = alignment_dir + '/gemBS.conf'
-gemBSjson = alignment_dir + '/gemBS.json'
-mbias_ob_reports = expand(mbias_dir + '/{sample}_OB.svg', sample = config['samples'])
-mbias_ot_reports = expand(mbias_dir + '/{sample}_OT.svg', sample = config['samples'])
+### WG-BLIMP v0.10.0 MODULAR ALIGNER
 
-temp_dir = config['temp_dir']
+### GEMBS
+if aligner == 'gembs':
+    target_files = [ output_dir + '/' + outfile for outfile in config['target_files']]
+    csv_reports = expand(alignment_dir + '/{sample}.csv', sample = config['samples'])
+    runtime_report = qc_dir + '/runtime.pdf'
+    gemBSconf = alignment_dir + '/gemBS.conf'
+    gemBSjson = alignment_dir + '/gemBS.json'
+    mbias_ob_reports = expand(mbias_dir + '/{sample}_OB.svg', sample = config['samples'])
+    mbias_ot_reports = expand(mbias_dir + '/{sample}_OT.svg', sample = config['samples'])
+    temp_dir = config['temp_dir']
 
-rule all:
-    input:
-        target_files +
-        csv_reports +
-        [ runtime_report ] +
-        [ gemBSconf ] +
-        [ gemBSjson ] +
-        mbias_ob_reports +
-        mbias_ot_reports
+    rule all:
+        input:
+            target_files +
+            csv_reports +
+            [ runtime_report ] +
+            [ gemBSconf ] +
+            [ gemBSjson ] +
+            mbias_ob_reports +
+            mbias_ot_reports
 
+    ### ALIGNMENT
 
-### ALIGNMENT
+    rule find_fqs:
+        output:
+            first  = output_dir +'/raw/{sample}.first.txt',
+            second = output_dir +'/raw/{sample}.second.txt'
+        params:
+            rawdir = config['rawdir'],
+            samples = config['samples'],
+            first_regex = config['rawsuffixregex']['first'],
+            second_regex = config['rawsuffixregex']['second'],
+            sample_fastq_csv = config['sample_fastq_csv']
+        log:
+            log_dir + '/find_fqs/{sample}.log'
+        priority: 10
+        conda:
+            conda_env_dir + '/r.yaml'
+        script:
+            'scripts/findFastqs.R'
 
+    rule prep_gemBS_files:
+        output:
+            csv = output_dir + '/alignment/gemBS.csv',
+            conf = output_dir + '/alignment/gemBS.conf'
+        priority: 9
+        shell:
+            """
+            touch {output.csv}
+            sed -i '1i"Barcode","Dataset","File1", "File2"' {output.csv}
+            cat << EOF > {output.conf}
+    reference = {ref_fasta}
+    index_dir = {raw_dir}
+    base = $HOME
+    sequence_dir = {raw_dir}
+    bam_dir = {alignment_dir}
+    bcf_dir = {alignment_dir}
+    extract_dir = {alignment_dir}
+    report_dir = {log_dir}
+    threads = {num_threads}
+    jobs = 4
+    include IHEC_standard.conf
+    EOF
+            """
 
-rule find_fqs:
-    output:
-        first  = output_dir +'/raw/{sample}.first.txt',
-        second = output_dir +'/raw/{sample}.second.txt'
-    params:
-        rawdir = config['rawdir'],
-        samples = config['samples'],
-        first_regex = config['rawsuffixregex']['first'],
-        second_regex = config['rawsuffixregex']['second'],
-        sample_fastq_csv = config['sample_fastq_csv']
-    log:
-        log_dir + '/find_fqs/{sample}.log'
-    priority: 10
-    conda:
-        conda_env_dir + '/r.yaml'
-    script:
-        'scripts/findFastqs.R'
+    rule gemBS_csv:
+        output:
+            metadata  = output_dir +'/alignment/{sample}.csv'
+        params:
+            outdir = config['output_dir'],
+            aligndir = alignment_dir,
+            rawdir = config['rawdir'],
+            samples = config['samples'],
+            first_regex = config['rawsuffixregex']['first'],
+            second_regex = config['rawsuffixregex']['second'],
+            sample_fastq_csv = config['sample_fastq_csv']
+        log:
+            log_dir + '/gemBS/{sample}.log'
+        priority: 8
+        conda:
+            conda_env_dir + '/r.yaml'
+        script:
+            'scripts/gemBS_csv.R'
 
-rule prep_gemBS_files:
-    output:
-        csv = output_dir + '/alignment/gemBS.csv',
-        conf = output_dir + '/alignment/gemBS.conf'
-    priority: 9
-    shell:
-        """
-        touch {output.csv}
-        sed -i '1i"Barcode","Dataset","File1", "File2"' {output.csv}
-        cat << EOF > {output.conf}
-reference = {ref_fasta}
-index_dir = {raw_dir} 
-base = $HOME
-sequence_dir = {raw_dir}
-bam_dir = {alignment_dir}
-bcf_dir = {alignment_dir}
-extract_dir = {alignment_dir}
-report_dir = {log_dir}
-threads = {num_threads}
-jobs = 4
-include IHEC_standard.conf
-EOF
-        """
+    rule clean_gemBS_csv:
+        input:
+            rules.prep_gemBS_files.output.csv
+        output:
+            csv = output_dir + '/alignment/gemBS_cleaned.csv'
+        priority: 7
+        shell:
+            """
+            sed 's/"//g' {input} > {output}
+            """
 
-rule gemBS_csv:
-    output:
-        metadata  = output_dir +'/alignment/{sample}.csv'
-    params:
-        outdir = config['output_dir'],
-        aligndir = alignment_dir,
-        rawdir = config['rawdir'],
-        samples = config['samples'],
-        first_regex = config['rawsuffixregex']['first'],
-        second_regex = config['rawsuffixregex']['second'],
-        sample_fastq_csv = config['sample_fastq_csv']
-    log:
-        log_dir + '/gemBS/{sample}.log'
-    priority: 8
-    conda:
-        conda_env_dir + '/r.yaml'
-    script:
-        'scripts/gemBS_csv.R'
+    rule gemBS:
+        input:
+            rules.clean_gemBS_csv.output
+        output:
+            alignment_dir + '/gemBS.json'
+        log:
+            log_dir + '/gemBS/gemBS.log'
+        priority: 6
+        shell:
+            """
+            export alignDir={alignment_dir} 2> {log}
+            snakemake_wrapper/scripts/gemBS.sh 2> {log}
+            """
 
-rule clean_gemBS_csv:
-    input:
-        rules.prep_gemBS_files.output.csv
-    output:
-        csv = output_dir + '/alignment/gemBS_cleaned.csv'
-    priority: 7
-    shell:
-        """
-        sed 's/"//g' {input} > {output}
-        """ 
+    rule prep_fai:
+        output:
+            ref_fasta + '.gemBS.ref.fai'
+        priority: 5
+        shell:
+            """
+            mv {raw_dir}/*.fai {output}
+            """
 
-rule gemBS:
-    input:
-        rules.clean_gemBS_csv.output
-    output:
-        alignment_dir + '/gemBS.json'
-    log:
-        log_dir + '/gemBS/gemBS.log'
-    priority: 6
-    shell:
-        """
-        export alignDir={alignment_dir} 2> {log}
-        snakemake_wrapper/scripts/gemBS.sh 2> {log}
-        """
+    rule mark_duplicates:
+        output:
+            bam = alignment_dir + '/{sample}.bam',
+            metrics = temp(alignment_dir + '/{sample}-dup-metrics.txt')
+        log:
+            log_dir + '/{sample}.mark_duplicates.log'
+        benchmark:
+            benchmark_dir + '/deduplication/{sample}.tsv'
+        params:
+            tmp_dir = temp_dir,
+            max_memory = config['java_memory_gb']
+        conda:
+            conda_env_dir + '/picard.yaml'
+        shell:
+            'picard -Xmx{params.max_memory}G MarkDuplicates -I {alignment_dir}/{wildcards.sample}.unmarked.bam -O {output.bam} -M {output.metrics} -TMP_DIR {params.tmp_dir} &> {log}'
+elif aligner == 'bwameth':
+    target_files = [ output_dir + '/' + outfile for outfile in config['target_files']]
+    runtime_report = qc_dir + '/runtime.pdf'
+    mbias_ob_reports = expand(mbias_dir + '/{sample}_OB.svg', sample = config['samples'])
+    mbias_ot_reports = expand(mbias_dir + '/{sample}_OT.svg', sample = config['samples'])
 
-rule prep_fai:
-    output:
-        ref_fasta + '.gemBS.ref.fai'
-    priority: 5
-    shell:
-        """
-        mv {raw_dir}/*.fai {output}
-        """
+    temp_dir = config['temp_dir']
 
-rule mark_duplicates:
-    output:
-        bam = alignment_dir + '/{sample}.bam',
-        metrics = temp(alignment_dir + '/{sample}-dup-metrics.txt')
-    log:
-        log_dir + '/{sample}.mark_duplicates.log'
-    benchmark:
-        benchmark_dir + '/deduplication/{sample}.tsv'
-    params:
-        tmp_dir = temp_dir,
-        max_memory = config['java_memory_gb']
-    conda:
-        conda_env_dir + '/picard.yaml'
-    shell:
-        'picard -Xmx{params.max_memory}G MarkDuplicates -I {alignment_dir}/{wildcards.sample}.unmarked.bam -O {output.bam} -M {output.metrics} -TMP_DIR {params.tmp_dir} &> {log}'
+    rule all:
+        input:
+            target_files +
+            [ runtime_report ] +
+            mbias_ob_reports +
+            mbias_ot_reports
+
+    ### ALIGNMENT
+
+    rule find_fqs:
+        output:
+            first  = output_dir +'/raw/{sample}.first.txt',
+            second = output_dir +'/raw/{sample}.second.txt'
+        params:
+            rawdir = config['rawdir'],
+            samples = config['samples'],
+            first_regex = config['rawsuffixregex']['first'],
+            second_regex = config['rawsuffixregex']['second'],
+            sample_fastq_csv = config['sample_fastq_csv']
+        log:
+            log_dir + '/find_fqs/{sample}.log'
+        priority: 10
+        conda:
+            conda_env_dir + '/r.yaml'
+        script:
+            'scripts/findFastqs.R'
+
+    rule bwameth_indexing:
+        input:
+            ref = ref_fasta
+        output:
+            indices = [
+                ref_fasta + '.bwameth.c2t',
+                ref_fasta + '.bwameth.c2t.amb',
+                ref_fasta + '.bwameth.c2t.ann',
+                ref_fasta + '.bwameth.c2t.bwt',
+                ref_fasta + '.bwameth.c2t.pac',
+                ref_fasta + '.bwameth.c2t.sa',
+                ref_fasta + '.fai'
+            ]
+        log:
+            log_dir + '/bwameth_indexing.log'
+        conda:
+            conda_env_dir + '/bwameth.yaml'
+        shell:
+            """
+            bwameth.py index {input} 2> {log}
+            samtools faidx {input} 2> {log}
+            """
+
+    rule bwameth_align:
+        input:
+            ref = ref_fasta,
+            indices = [
+                ref_fasta + '.bwameth.c2t',
+                ref_fasta + '.bwameth.c2t.amb',
+                ref_fasta + '.bwameth.c2t.ann',
+                ref_fasta + '.bwameth.c2t.bwt',
+                ref_fasta + '.bwameth.c2t.pac',
+                ref_fasta + '.bwameth.c2t.sa',
+                ref_fasta + '.fai'
+            ],
+            first  = output_dir +'/raw/{sample}.first.txt',
+            second = output_dir +'/raw/{sample}.second.txt'
+        output:
+            temp(alignment_dir + '/{sample}.unsorted.bam')
+        log:
+            log_dir + '/{sample}.align.log'
+        threads:
+            num_threads
+        benchmark:
+            benchmark_dir + '/alignment/{sample}.tsv'
+        conda:
+            conda_env_dir + '/bwameth.yaml'
+        shell:
+            """
+            FQ1=$(cat {input.first} | tr '\n' ',')
+            FQ2=$(cat {input.second} | tr '\n' ',')
+            bwameth.py -t {threads} --reference {input.ref} $FQ1 $FQ2 2> {log} | samtools view -b - > {output} 2>/dev/null
+            """
+
+    rule sort_bam:
+        input:
+            rules.bwameth_align.output
+        output:
+            temp(alignment_dir + '/{sample}.sorted.bam')
+        log:
+            log_dir + '/{sample}.sorting.log'
+        threads:
+            num_threads
+        benchmark:
+            benchmark_dir + '/sorting/{sample}.tsv'
+        conda:
+            conda_env_dir + '/samtools.yaml'
+        shell:
+            'samtools sort -o {output} -@ {threads} {input} 2> {log}'
+
+    rule mark_duplicates:
+        input:
+            rules.sort_bam.output
+        output:
+            bam = alignment_dir + '/{sample}.bam',
+            metrics = temp(alignment_dir + '/{sample}-dup-metrics.txt')
+        log:
+            log_dir + '/{sample}.mark_duplicates.log'
+        benchmark:
+            benchmark_dir + '/deduplication/{sample}.tsv'
+        params:
+            tmp_dir = temp_dir,
+            max_memory = config['java_memory_gb']
+        conda:
+            conda_env_dir + '/picard.yaml'
+        shell:
+            'picard -Xmx{params.max_memory}G MarkDuplicates -I {input} -O {output.bam} -M {output.metrics} -TMP_DIR {params.tmp_dir} &> {log}'
+
 
 rule index_bam:
     input:
@@ -234,24 +359,44 @@ rule qualimap:
          conda_env_dir + '/qualimap.yaml'
      shell:
          'qualimap bamqc -bam {input} -outdir $(dirname {output}) -nt {threads} --collect-overlap-pairs --skip-duplicated --java-mem-size={params.memory}G &> {log} '
- 
-rule mbias:
-     input:
-         fasta_ref = ref_fasta,
-         fasta_index = ref_fasta + '.gemBS.ref.fai',
-         bam_file = alignment_dir + '/{sample}.bam',
-         bam_index = alignment_dir + '/{sample}.bai'
-     log:
-         log_dir + '/{sample}_mbias.log'
-     benchmark:
-         benchmark_dir + '/{sample}_mbias.tsv'
-     output:
-         mbias_ot = mbias_dir + '/{sample}_OT.svg',
-         mbias_ob = mbias_dir + '/{sample}_OB.svg'
-     conda:
-         conda_env_dir + '/methyldackel.yaml'
-     shell:
-         'MethylDackel mbias {input.fasta_ref} {input.bam_file} {mbias_dir}/{wildcards.sample} &> {log}'
+
+if aligner == 'gembs':
+    rule mbias:
+         input:
+             fasta_ref = ref_fasta,
+             fasta_index = ref_fasta + '.gemBS.ref.fai',
+             bam_file = alignment_dir + '/{sample}.bam',
+             bam_index = alignment_dir + '/{sample}.bai'
+         log:
+             log_dir + '/{sample}_mbias.log'
+         benchmark:
+             benchmark_dir + '/{sample}_mbias.tsv'
+         output:
+             mbias_ot = mbias_dir + '/{sample}_OT.svg',
+             mbias_ob = mbias_dir + '/{sample}_OB.svg'
+         conda:
+             conda_env_dir + '/methyldackel.yaml'
+         shell:
+             'MethylDackel mbias {input.fasta_ref} {input.bam_file} {mbias_dir}/{wildcards.sample} &> {log}'
+elif aligner == 'bwameth':
+    rule mbias:
+         input:
+             fasta_ref = ref_fasta,
+             fasta_index = ref_fasta + '.fai',
+             bam_file = alignment_dir + '/{sample}.bam',
+             bam_index = alignment_dir + '/{sample}.bai'
+         log:
+             log_dir + '/{sample}_mbias.log'
+         benchmark:
+             benchmark_dir + '/{sample}_mbias.tsv'
+         output:
+             mbias_ot = mbias_dir + '/{sample}_OT.svg',
+             mbias_ob = mbias_dir + '/{sample}_OB.svg'
+         conda:
+             conda_env_dir + '/methyldackel.yaml'
+         shell:
+             'MethylDackel mbias {input.fasta_ref} {input.bam_file} {mbias_dir}/{wildcards.sample} &> {log}'
+
 
 rule multiqc:
      input:
@@ -269,7 +414,7 @@ rule multiqc:
          conda_env_dir + '/multiqc.yaml'
      shell:
          'multiqc -f -o {qc_dir} {qc_dir}/fastqc {qc_dir}/picard-metrics {qc_dir}/qualimap &> {log} '
-  
+
 rule methylation_metrics:
      input:
          bed_graphs = expand(methylation_dir + '/{sample}_CpG.bedGraph', sample = config['samples'])
@@ -285,8 +430,8 @@ rule methylation_metrics:
          conda_env_dir + '/r.yaml'
      script:
          'scripts/methylationMetrics.R'
-  
-  
+
+
 ## DMR CALLING
 
 
@@ -306,7 +451,7 @@ rule methyl_dackel:
          conda_env_dir + '/methyldackel.yaml'
      shell:
          'MethylDackel extract --mergeContext -o {params.methylation_dir}/{wildcards.sample} {input.ref} {input.bam}'
-  
+
 rule bedgraph_to_methylation_ratio:
      input:
          bedGraph = methylation_dir + '/{sample}_CpG.bedGraph'
@@ -320,7 +465,7 @@ rule bedgraph_to_methylation_ratio:
          conda_env_dir + '/r.yaml'
      script:
          'scripts/transformBedGraph.R'
-  
+
 rule metilene_input:
      input:
          expand(methylation_dir + '/{sample}_CpG_ratio.bedGraph', sample = config['group1']),
@@ -336,7 +481,7 @@ rule metilene_input:
          conda_env_dir + '/metilene.yaml'
      shell:
          'bedtools unionbedg -filler NA -header -names {params.g1_header} {params.g2_header} -i {input} > {output}'
-  
+
 rule metilene:
      input:
          metilene_dir + '/metilene-input.bedGraph'
@@ -355,7 +500,7 @@ rule metilene:
          conda_env_dir + '/metilene.yaml'
      shell:
          'metilene -m {params.min_cpg} -d {params.min_diff} -t {threads} {input} > {output} 2> {log}'
-  
+
 rule camel_index:
      input:
          ref = ref_fasta,
@@ -365,7 +510,7 @@ rule camel_index:
          snakemake_dir = snakemake_dir
      shell:
          'python {params.snakemake_dir}/submodules/camel/modules/index.py {input.ref} {output}'
-  
+
 rule camel_call:
      input:
          index = ref_fasta + '.h5',
@@ -381,7 +526,7 @@ rule camel_call:
          benchmark_dir + '/camel/{sample}.tsv'
      shell:
          'python {params.snakemake_dir}/submodules/camel/modules/call.py {input.bam} {input.index} {output} 2> {log}'
-  
+
 rule camel_dmr:
      input:
          index   = ref_fasta + '.h5',
@@ -400,7 +545,7 @@ rule camel_dmr:
          benchmark_dir + '/camel/dmr.tsv'
      shell:
          'python {params.snakemake_dir}/submodules/camel/modules/dmr.py {input.index} --case {input.case} --control {input.control} --min_diff {params.min_diff} --min_cpg {params.min_cpg} --min_cov {params.min_cov} > {output} 2> {log}'
-  
+
 rule bsseq:
      input:
          meth = expand(methylation_dir + '/{sample}_CpG.bedGraph', sample = config['samples'])
@@ -419,31 +564,49 @@ rule bsseq:
      conda:
          conda_env_dir + '/r.yaml'
      script:
-         'scripts/bsseq.R'  
+         'scripts/bsseq.R'
 
 
 ## DMR comparison
-  
-  
+
+
 def expected_tool_files():
      return {tool: dmr_dir + '/' + tool + '/dmrs.csv' for tool in config['dmr_tools']}
-  
-rule dmr_combination:
-     input:
-         **expected_tool_files(),
-         fasta_index = ref_fasta + '.gemBS.ref.fai'
-     output:
-         csv = dmr_dir + '/combined-dmrs.csv',
-         bed = dmr_dir + '/dmr-coverage/combined-dmrs.bed'
-     log:
-         log_dir + '/dmr_combination.log'
-     benchmark:
-         benchmark_dir + '/dmr_annotation/combination.tsv'
-     conda:
-         conda_env_dir + '/r.yaml'
-     script:
-         'scripts/dmrCombination.R'
-  
+
+if aligner == 'gembs':
+    rule dmr_combination:
+         input:
+             **expected_tool_files(),
+             fasta_index = ref_fasta + '.gemBS.ref.fai'
+         output:
+             csv = dmr_dir + '/combined-dmrs.csv',
+             bed = dmr_dir + '/dmr-coverage/combined-dmrs.bed'
+         log:
+             log_dir + '/dmr_combination.log'
+         benchmark:
+             benchmark_dir + '/dmr_annotation/combination.tsv'
+         conda:
+             conda_env_dir + '/r.yaml'
+         script:
+             'scripts/dmrCombination.R'
+elif aligner == 'bwameth':
+    rule dmr_combination:
+         input:
+             **expected_tool_files(),
+             fasta_index = ref_fasta + '.fai'    
+         output:
+             csv = dmr_dir + '/combined-dmrs.csv',
+             bed = dmr_dir + '/dmr-coverage/combined-dmrs.bed'
+         log:
+             log_dir + '/dmr_combination.log'
+         benchmark:
+             benchmark_dir + '/dmr_annotation/combination.tsv'
+         conda:
+             conda_env_dir + '/r.yaml'
+         script:
+             'scripts/dmrCombination.R'
+
+
 rule dmr_coverage:
      input:
          bed = dmr_dir + '/dmr-coverage/combined-dmrs.bed',
@@ -460,7 +623,7 @@ rule dmr_coverage:
          conda_env_dir + '/mosdepth.yaml'
      shell:
          'mosdepth --threads {threads} --no-per-base --mapq {params.min_mapq} --by {input.bed} $(dirname {output})/{wildcards.sample} {input.bam}'
-  
+
 rule dmr_annotation:
      input:
          coverages = expand(dmr_dir + '/dmr-coverage/{sample}.regions.bed.gz', sample = config['samples']),
@@ -481,11 +644,11 @@ rule dmr_annotation:
          conda_env_dir + '/r.yaml'
      script:
          'scripts/dmrAnnotation.R'
-  
-  
+
+
 ## SEGMENTATION
-  
-  
+
+
 rule methylseekr:
      input:
          ref = ref_fasta,
@@ -519,11 +682,11 @@ rule methylseekr:
          conda_env_dir + '/r.yaml'
      script:
          'scripts/methylseekRSegmentation.R'
-  
-  
+
+
 ## BENCHMARKING
-  
-  
+
+
 rule benchmark_plot:
      input:
          target_files = target_files
@@ -537,4 +700,3 @@ rule benchmark_plot:
          conda_env_dir + '/r.yaml'
      script:
          'scripts/benchmarkPlot.R'
-  
