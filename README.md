@@ -98,10 +98,10 @@ You can use the command `wg-blimp run-shiny` to load one or more project config 
 
 Some example `.fastq` can be found on [Sciebo](https://uni-muenster.sciebo.de/s/7vpqRSEATYcvlnP). You can use the command
 ```
-wg-blimp run-snakemake fastq/ chr22.fasta blood1,blood2 sperm1,sperm2 results --cores=8
+wg-blimp run-snakemake fastq/ chr22.fasta blood1,blood2 sperm1,sperm2 results --cores=8 --aligner=gembs
 ```
 
-Please not that the pipeline commands also allow a `--use-sample-files` option so sample groups can be loaded from text files instead of comma separates files.
+Please note that the pipeline commands also allow a `--use-sample-files` option so sample groups can be loaded from text files instead of comma separates files.
 
 
 ## Config parameters
@@ -110,6 +110,7 @@ The following entries are used for running the Snakemake pipeline and may be spe
 
 | Key | Value |
 | --- | ----- |
+| *aligner* | Aligner to be used by pipeline. Choose either gemBS or bwa-meth. |
 | *annotation_allowed_biotypes* | Only genes with this biotype will be annotated in the DMR table (see https://www.gencodegenes.org/pages/biotypes.html ). |
 | *annotation_min_mapq* | When annotating coverage, only use reads with a minimum mapping quality |
 | *bsseq_local_correct* | Use local correction for bsseq DMR calling. Usually, setting this to FALSE will increase the number of calls. |
