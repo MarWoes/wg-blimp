@@ -135,6 +135,8 @@ if aligner == 'gembs':
         log:
             log_dir + '/gemBS/gemBS.log'
         priority: 6
+        conda:
+            conda_env_dir + '/gemBS.yaml'
         shell:
             """
             export alignDir={alignment_dir} 2> {log}
