@@ -140,7 +140,7 @@ if aligner == 'gembs':
         shell:
             """
             export alignDir={alignment_dir} 2> {log}
-            snakemake_wrapper/scripts/gemBS.sh 2> {log}
+            {snakemake_dir}/scripts/gemBS.sh 2> {log}
             """
 
     rule prep_fai:
@@ -595,7 +595,7 @@ elif aligner == 'bwameth':
     rule dmr_combination:
          input:
              **expected_tool_files(),
-             fasta_index = ref_fasta + '.fai'    
+             fasta_index = ref_fasta + '.fai'
          output:
              csv = dmr_dir + '/combined-dmrs.csv',
              bed = dmr_dir + '/dmr-coverage/combined-dmrs.bed'
