@@ -6,7 +6,7 @@ if (exists("snakemake")) {
 }
 
 library(MethylSeekR)
-library(stringr)
+library(tidyverse)
 library(data.table)
 library(rtracklayer)
 library(parallel)

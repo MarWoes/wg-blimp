@@ -5,9 +5,8 @@ dependencies:
  - r-base
  - r-cairo
  - r-data.table
- - r-ggplot2
+ - r-tidyverse
  - r-kernsmooth
- - r-stringr
  - bioconductor-biocparallel
  - bioconductor-biostrings
  - bioconductor-bsseq

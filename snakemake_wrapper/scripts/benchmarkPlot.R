@@ -5,8 +5,7 @@ if (exists("snakemake")) {
   sink(logFile, append = TRUE, type = "message")
 }
 
-library(ggplot2)
-library(stringr)
+library(tidyverse)
 library(data.table)
 
 benchmarkDir <- snakemake@params$benchmark_dir
@@ -25,7 +24,7 @@ benchmarkReports <- lapply(benchmarkFiles, function (file) {
   return(benchmarkReport)
 })
 
-fullBenchmarkReport <- rbindlist(benchmarkReports)
+fullBenchmarkReport <- rbindlist(benchmarkReports, fill = TRUE)
 
 pdf(targetPlot)
 

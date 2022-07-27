@@ -6,6 +6,7 @@ if (exists("snakemake")) {
 }
 
 library(data.table)
+library(tidyverse)
 
 ### FUNCTIONS
 
@@ -75,8 +76,12 @@ rawDir <- snakemake@params$rawdir
 allSamples <- snakemake@params$samples
 targetSample <- snakemake@wildcards$sample
 
-forwardOutputFile <- snakemake@output$first
-reverseOutputFile <- snakemake@output$second
+
+OutputFile <- snakemake@output$metadata
+OutputFileDir <- snakemake@params$aligndir
+OutputFilegemBS <- paste(c(snakemake@params$outdir, "/alignment/gemBS.csv"), collapse="")
+targetSampleCsv <- paste(c(targetSample, ".csv"), collapse="")
+pathTargetSampleCsv <- paste(c(OutputFileDir, targetSampleCsv), collapse="/")
 
 forwardReadRegex <- snakemake@params$first_regex
 reverseReadRegex <- snakemake@params$second_regex
@@ -93,7 +98,9 @@ if (length(sampleFastqCsv) == 1 && is.character(sampleFastqCsv) && file.exists(s
 
 }
 
-writeLines(sampleFastqFiles$forward, forwardOutputFile)
-writeLines(sampleFastqFiles$reverse, reverseOutputFile)
-
-
+file1 <- basename(sampleFastqFiles$forward)
+file2 <- basename(sampleFastqFiles$reverse)
+data <- data.frame("Barcode" = targetSample, "Name" = targetSample,  "Dataset" = targetSample, "File1" = file1, "File2" = file2)
+write.csv(x = data, file = OutputFile, row.names = FALSE)
+gemBSmerge <- c(OutputFilegemBS, pathTargetSampleCsv) %>% lapply(read_csv) %>% bind_rows
+write.csv(x = gemBSmerge, file = OutputFilegemBS, row.names = FALSE)

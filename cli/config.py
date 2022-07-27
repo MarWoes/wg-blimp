@@ -88,7 +88,7 @@ def get_methylseekr_calibration_chromosome(genome_build):
     return options[genome_build]
 
 
-def get_default_config(fastq_dir, fasta_ref, group1, group2, genome_build, cores_per_job, output_dir):
+def get_default_config(fastq_dir, fasta_ref, group1, group2, genome_build, aligner, cores_per_job, output_dir):
 
     mandatory_parameters = {
         'rawdir': os.path.abspath(fastq_dir),
@@ -98,7 +98,8 @@ def get_default_config(fastq_dir, fasta_ref, group1, group2, genome_build, cores
         'samples': group1 + group2,
         'ref': os.path.abspath(fasta_ref),
         'computing_threads': cores_per_job,
-        'io_threads': cores_per_job
+        'io_threads': cores_per_job,
+        'aligner': aligner
     }
 
     optional_parameters = get_default_optional_parameters()
@@ -129,7 +130,7 @@ def read_samples_from_file(sample_file):
         return f.read().splitlines()
 
 
-def create_config(use_sample_files, genome_build, cores_per_job, fastq_dir, reference_fasta, group1, group2, output_dir, target_yaml):
+def create_config(use_sample_files, genome_build, aligner, cores_per_job, fastq_dir, reference_fasta, group1, group2, output_dir, target_yaml):
 
     if (use_sample_files):
 
@@ -141,6 +142,6 @@ def create_config(use_sample_files, genome_build, cores_per_job, fastq_dir, refe
         samples_in_group1 = group1.split(',')
         samples_in_group2 = group2.split(',')
 
-    config_yaml = get_default_config(fastq_dir, reference_fasta, samples_in_group1, samples_in_group2, genome_build, cores_per_job, output_dir)
+    config_yaml = get_default_config(fastq_dir, reference_fasta, samples_in_group1, samples_in_group2, genome_build, aligner, cores_per_job, output_dir)
 
     dump_config(config_yaml, target_yaml)
